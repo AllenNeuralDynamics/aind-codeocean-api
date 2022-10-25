@@ -72,22 +72,8 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         return MockResponse(status_code=200, message=success_message)
 
-    def test_json_data(self):
-        """Tests that the json data is created correctly"""
-        created_json_data = self.co_client.create_post_json_data(
-            asset_name="ecephys_625463_2022-10-06_10-14-25",
-            mount="ecephys_625463_2022-10-06_10-14-25",
-            bucket="aind-test-bucket",
-            prefix="ecephys_625463_2022-10-06_10-14-25",
-            access_key_id="AWS_ACCESS_KEY",
-            secret_access_key="AWS_SECRET_ACCESS_KEY",
-            tags=["ecephys"],
-        )
-
-        self.assertEqual(self.expected_json_data, created_json_data)
-
     @mock.patch(
-        "transfer.codeocean.CodeOceanDataAssetRequests.register_data_asset"
+        "code_ocean_api.CodeOceanDataAssetRequests.register_data_asset"
     )
     def test_register_data_asset(self, mock_api_call):
         """Tests the response of registering a data asset"""
