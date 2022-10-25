@@ -128,7 +128,7 @@ class CodeOceanDataAssetRequests():
         return response.json()
 
 
-class CodeOceanDataCapsuleRequests():
+class CodeOceanCapsuleRequests():
     """This class will handle the methods needed to manage capsules stored
     on Code Ocean's platform.
     """
@@ -241,9 +241,3 @@ class CodeOceanDataCapsuleRequests():
         )
 
         return response.json()
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()

@@ -8,10 +8,7 @@ description = "Code ocean API manager in Python"
 license = {text = "MIT"}
 requires-python = ">=3.7"
 authors = [
-    {name = "David Feng", email="david.feng@alleninstitute.org"},
-    {name = "Jon Young", email="jon.young@alleninstitute.org"},
-    {name = "Dana Rocha", email="dana.rocha@alleninstitute.org"},
-    {name = "Camilo Laiton", email="camilo.laiton@alleninstitute.org"}
+    {name = "Allen Institute for Neural Dynamics"}
 ]
 classifiers = [
     "Programming Language :: Python :: 3"
