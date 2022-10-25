@@ -2,7 +2,6 @@
 """
 import requests
 from typing import List, Dict
-from .credentials import CREDENTIALS
 
 class CodeOceanDataAssetRequests():
     """This class will handle the methods needed to manage data assets stored
