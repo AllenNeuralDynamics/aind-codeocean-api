@@ -4,26 +4,25 @@ import requests
 from typing import List, Dict
 from .credentials import CREDENTIALS
 
-class CodeOceanClient:
-    """Client that will connect to CodeOcean"""
-
-    def __init__(self, domain, token):
-        """
-        Args:
-            domain (str): Domain of VPC
-            token (str): Authorization token
-        """
-        self.domain = domain
-        self.token = token
-
-
-class CodeOceanDataAssetRequests(CodeOceanClient):
+class CodeOceanDataAssetRequests():
     """This class will handle the methods needed to manage data assets stored
     on Code Ocean's platform.
     """
 
-    api_version = 1
-    asset_url = f"/api/v{api_version}/data_assets"
+    def __init__(self, domain:str, token:str) -> None:
+        """
+        Parameters
+        ---------------
+        domain : string
+            Domain of VPC
+        token : string
+            Authorization token
+        """
+
+        self.domain = domain
+        self.token = token
+        self.api_version = 1
+        self.asset_url = f"/api/v{self.api_version}/data_assets"
 
     def get_data_asset(self, data_asset_id:str) -> dict:
         """
@@ -130,14 +129,27 @@ class CodeOceanDataAssetRequests(CodeOceanClient):
         return response.json()
 
 
-class CodeOceanDataCapsuleRequests(CodeOceanClient):
+class CodeOceanDataCapsuleRequests():
     """This class will handle the methods needed to manage capsules stored
     on Code Ocean's platform.
     """
 
-    api_version = 1
-    capsule_url = f"/api/v{api_version}/capsules"
-    computation_url = f"/api/v{api_version}/computations"
+    def __init__(self, domain:str, token:str) -> None:
+        """
+        Parameters
+        ---------------
+        domain : string
+            Domain of VPC
+        token : string
+            Authorization token
+        """
+
+        self.domain = domain
+        self.token = token
+        self.api_version = 1
+        self.asset_url = f"/api/v{self.api_version}/data_assets"
+        self.capsule_url = f"/api/v{self.api_version}/capsules"
+        self.computation_url = f"/api/v{self.api_version}/computations"
 
     def get_capsule(self, capsule_id:str) -> dict:
         """
@@ -232,16 +244,7 @@ class CodeOceanDataCapsuleRequests(CodeOceanClient):
         return response.json()
 
 def main():
-
-    # dataset_name = #'SmartSPIM_640393_2022-10-20_15-50-49'
-    # bucket = 'aind-open-data'
-    # tags = ['smartSPIM_data']
-    
-    co_client = CodeOceanDataCapsuleRequests(CREDENTIALS['domain'] , CREDENTIALS['token'])
-    res = co_client.get_capsule(#COMPLETE)
-    print("Capsule metadata: ", res)
-    # res = co_client.get_capsule_computations(#COMPLETE)
-    # print(res)
+    pass
 
 if __name__ == "__main__":
     main()
