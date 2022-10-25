@@ -2,8 +2,7 @@
 import unittest
 from unittest import mock
 
-from transfer.codeocean import CodeOceanDataAssetRequests
-
+from code_ocean_api import CodeOceanDataAssetRequests
 
 class TestCodeOceanDataAssetRequests(unittest.TestCase):
     """Tests Data Asset Requests class methods"""
