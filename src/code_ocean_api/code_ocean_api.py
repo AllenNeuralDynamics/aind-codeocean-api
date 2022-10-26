@@ -1,7 +1,7 @@
 """Module to interface with codeocean api.
 """
 import requests
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class CodeOceanDataAssetRequests():
     """This class will handle the methods needed to manage data assets stored
@@ -46,31 +46,40 @@ class CodeOceanDataAssetRequests():
         mount:str,
         bucket:str,
         prefix:str,
-        access_key_id:str,
-        secret_access_key:str,
-        tags:List[str]=None,
-        asset_description:str="",
-        keep_on_external_storage:bool=True,
-        index_data:bool=True
+        access_key_id:Optional[str]=None,
+        secret_access_key:Optional[str]=None,
+        tags:Optional[List[str]]=None,
+        asset_description:Optional[str]="",
+        keep_on_external_storage:Optional[bool]=True,
+        index_data:Optional[bool]=True
     ) -> dict:
         """
-        This will create a json object that will be attached to a post request.
-        Args:
-            asset_name (str): Name of the asset
-            mount (str): Mount point
-            bucket (str): Currently only aws buckets are allowed
-            prefix (str): The object prefix in the bucket
-            access_key_id (str): AWS access key
-            secret_access_key (str): AWS secret access key
-            tags (list[str]): A list of tags to attach to the data asset
-            asset_description (str): A description of the data asset.
-              Defaults to blank.
-            keep_on_external_storage (bool): Keep data asset on external
-              storage. Defaults to True.
-            index_data (bool): Whether to index the data asset.
-              Defaults to True.
-        Returns:
-            A json object as documented by CodeOcean's v1 api docs.
+        Parameters
+        ---------------
+        asset_name : string
+            Name of the asset
+        mount : string
+            Mount point
+        bucket : string
+            Bucket name. Currently only aws buckets are allowed.
+        prefix : string
+            The object prefix in the bucket
+        access_key_id : Optional[str]
+            AWS access key. It's not necessary for public buckets. Default None (not provided).
+        secret_access_key : Optional[str]
+            AWS secret access key. It's not necessary for public buckets. Default None (not provided).
+        tags : Optional[List[str]]
+            A list of tags to attach to the data asset. Default None (empty list).
+        asset_description : Optional[str]
+            A description of the data asset. Default blanks.
+        keep_on_external_storage : Optional[bool]
+            Keep data asset on external storage. Defaults to True.
+        index_data : Optional[bool]
+            Whether to index the data asset. Defaults to True.
+
+        Returns
+        ---------------
+        A json object as documented by CodeOcean's v1 api docs.
         """
 
         url = f"{self.domain}{self.asset_url}"
@@ -86,24 +95,45 @@ class CodeOceanDataAssetRequests():
                     "bucket": bucket,
                     "prefix": prefix,
                     "keep_on_external_storage": keep_on_external_storage,
-                    "index_data": index_data,
-                    "access_key_id": access_key_id,
-                    "secret_access_key": secret_access_key,
+                    "index_data": index_data
                 },
             },
         }
 
+        if access_key_id and secret_access_key:
+            json_data['source']['aws']['access_key_id'] = access_key_id
+            json_data['source']['aws']['secret_access_key'] = secret_access_key
+
         response = requests.post(url, json=json_data, auth=(self.token, ""))
-        return response
+        return response.json()
 
     def update_data_asset(
         self, 
         data_asset_id:str, 
         new_name:str, 
-        new_description:str=None, 
-        new_tags:List[str]=None, 
-        new_mount:str=None
+        new_description:Optional[str]=None, 
+        new_tags:Optional[List[str]]=None, 
+        new_mount:Optional[str]=None
     ) -> dict:
+        """
+        This will update a data asset from a PUT request to code ocean API.
+        
+        Parameters
+        ---------------
+        data_asset_id : string
+            ID of the data asset
+        new_name : str
+            New name of the data asset
+        new_description : Optional[str]
+            New description of the data asset. Default None (not updated)
+        new_tags : Optional[str]
+            New tags of the data asset. Default None (not updated)
+        new_mount : str
+            New mount of the data asset. Default None (not updated)
+        Returns
+        ---------------
+        A json object as documented by CodeOcean's v1 api docs.
+        """
 
         url = f"{self.domain}{self.asset_url}/{data_asset_id}"
         data = {
@@ -190,7 +220,7 @@ class CodeOceanCapsuleRequests():
         self, 
         capsule_id:str, 
         data_assets:Dict,
-        parameters:List=None,
+        parameters:Optional[List]=None,
     ) -> dict:
         """
         This will run a capsule/pipeline using a POST request to code ocean API.
