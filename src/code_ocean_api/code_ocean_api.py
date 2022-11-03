@@ -311,7 +311,7 @@ class CodeOceanComputationRequests():
         response = requests.get(url, auth=(self.token, ""))
         return response.json()
 
-    def get_list_computations(self, computation_id:str) -> dict:
+    def get_list_result_items(self, computation_id:str) -> dict:
         """
         This will get a list of the computation's metadata from a POST request to code ocean API.
         
@@ -349,3 +349,4 @@ class CodeOceanComputationRequests():
         url = f"{self.domain}{self.computation_url}/{computation_id}/results/download_url?path={path_to_file}"
         response = requests.get(url, auth=(self.token, ""))
         return response.json()
+
