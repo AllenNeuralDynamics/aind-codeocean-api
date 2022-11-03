@@ -271,3 +271,81 @@ class CodeOceanCapsuleRequests():
         )
 
         return response.json()
+
+class CodeOceanComputationRequests():
+    """This class will handle the methods needed to manage computations stored
+    on Code Ocean's platform.
+    """
+
+    def __init__(self, domain:str, token:str) -> None:
+        """
+        Parameters
+        ---------------
+        domain : string
+            Domain of VPC
+        token : string
+            Authorization token
+        """
+
+        self.domain = domain
+        self.token = token
+        self.api_version = 1
+        self.asset_url = f"/api/v{self.api_version}/data_assets"
+        self.computation_url = f"/api/v{self.api_version}/computations"
+
+    def get_computation(self, computation_id:str) -> dict:
+        """
+        This will get metadata from a GET request to code ocean API.
+        
+        Parameters
+        ---------------
+        computation_id : string
+            ID of the computation
+        
+        Returns
+        ---------------
+        A json object as documented by CodeOcean's v1 api docs.
+        """
+
+        url = f"{self.domain}{self.computation_url}/{computation_id}"
+        response = requests.get(url, auth=(self.token, ""))
+        return response.json()
+
+    def get_list_computations(self, computation_id:str) -> dict:
+        """
+        This will get a list of the computation's metadata from a POST request to code ocean API.
+        
+        Parameters
+        ---------------
+        computation_id : string
+            ID of the computation
+        
+        Returns
+        ---------------
+        A json object as documented by CodeOcean's v1 api docs.
+        """
+
+        url = f"{self.domain}{self.computation_url}/{computation_id}/results"
+        response = requests.post(url, auth=(self.token, ""))
+        return response.json()
+
+    def get_result_file_download_url(self, computation_id:str, path_to_file:str) -> dict:
+        """
+        This will get download link for a file from a GET request to code ocean API.
+        
+        Parameters
+        ---------------
+        computation_id : string
+            ID of the computation
+        
+        path_to_file : string
+            Path of the file under /results folder in code ocean capsule
+
+        Returns
+        ---------------
+        A json object as documented by CodeOcean's v1 api docs.
+        """
+
+        url = f"{self.domain}{self.computation_url}/{computation_id}/results/download_url?path={path_to_file}"
+        response = requests.get(url, auth=(self.token, ""))
+        return response.json()
