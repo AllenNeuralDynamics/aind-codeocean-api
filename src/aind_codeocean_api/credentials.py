@@ -7,7 +7,7 @@ class CodeOceanCredentials:
     """Class to hold CodeOcean Credentials"""
 
     @staticmethod
-    def _load_json(path):
+    def _load_json(path: str) -> json:
         """
         Loads credentials from a pth
         Parameters
