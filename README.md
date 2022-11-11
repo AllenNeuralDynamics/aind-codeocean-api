@@ -1,9 +1,9 @@
-# library-repo-template
+# aind-codeocean-api
 
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 ![Code Style](https://img.shields.io/badge/code%20style-black-black)
 
-Template for a minimal, basic repository for an AIND library.
+Python wrapper around CodeOcean's REST API.
 
 ## Installation
 To use the software, in the root directory, run
