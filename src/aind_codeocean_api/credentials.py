@@ -24,6 +24,7 @@ class CodeOceanCredentials:
                 return json.load(f)
 
     def __init__(self):
+        """Initializes credentials."""
         self.credentials_path = os.environ.get(
             "CODEOCEAN_CREDENTIALS_PATH", "credentials.json"
         )

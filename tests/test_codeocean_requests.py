@@ -1,5 +1,6 @@
 """Tests CodeOcean API python interface"""
 import unittest
+from typing import Any, Callable, List
 from unittest import mock
 
 from aind_codeocean_api.codeocean import CodeOceanClient
@@ -8,7 +9,14 @@ from aind_codeocean_api.codeocean import CodeOceanClient
 class MockResponse:
     """Mocks a rest request response"""
 
-    def __init__(self, content, status_code):
+    def __init__(self, content: dict, status_code: int) -> None:
+        """
+        Creates a Mocked Response
+        Parameters
+        ----------
+        content : dict
+        status_code : int
+        """
         self.content = content
         self.status_code = status_code
 
@@ -22,19 +30,41 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
     co_client = CodeOceanClient(domain, auth_token)
 
     @staticmethod
-    def mock_success_response(map_input_to_success_message, req_type):
-        def request_post_response(json):
+    def mock_success_response(
+        map_input_to_success_message: Callable[..., Any], req_type: str
+    ) -> Callable[..., MockResponse]:
+        """
+        Helper method to mock out a success response
+        Parameters
+        ----------
+        map_input_to_success_message : Callable
+          A function that maps inputs to a dict
+        req_type : str
+          TODO: Change this to an enum
+
+        Returns
+        -------
+        Callable
+          A function that maps to a MockResponse
+
+        """
+
+        def request_post_response(json: dict) -> MockResponse:
+            """Mock a post response"""
             success_message = map_input_to_success_message(json)
             return MockResponse(status_code=200, content=success_message)
 
-        def request_get_response(url):
+        def request_get_response(url: str) -> MockResponse:
+            """Mock a get response"""
             success_message = map_input_to_success_message(url)
             return MockResponse(status_code=200, content=success_message)
 
-        def request_put_response(url, json):
+        def request_put_response(url: str, json: dict) -> MockResponse:
+            """Mock a put response"""
             success_message = map_input_to_success_message(url, json)
             return MockResponse(status_code=200, content=success_message)
 
+        # TODO: Change these to enums
         if req_type == "post":
             return request_post_response
         elif req_type == "get":
@@ -43,7 +73,9 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             return request_put_response
 
     @mock.patch("requests.post")
-    def test_register_data_asset(self, mock_api_post):
+    def test_register_data_asset(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
         """Tests the response of registering a data asset"""
         asset_name = "ASSET_NAME"
         mount = "MOUNT_NAME"
@@ -64,12 +96,13 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                     "keep_on_external_storage": True,
                     "index_data": True,
                     "access_key_id": access_key_id,
-                    "secret_access_key": secret_access_key
+                    "secret_access_key": secret_access_key,
                 },
             },
         }
 
-        def map_to_success_message(input_json):
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
             success_message = {
                 "created": 1641420832,
                 "description": input_json["description"],
@@ -106,15 +139,21 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             asset_name=asset_name,
             mount=mount,
             bucket=bucket,
-            prefix=prefix, access_key_id=access_key_id,
-            secret_access_key= secret_access_key
+            prefix=prefix,
+            access_key_id=access_key_id,
+            secret_access_key=secret_access_key,
         )
         self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.get")
-    def test_get_data_asset(self, mock_api_get):
-        def map_to_success_message(url):
+    def test_get_data_asset(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Tests get_data_asset method."""
+
+        def map_to_success_message(url: str) -> dict:
+            """Map to a success message"""
             data_asset_id = url.split("/")[-1]
             success_response = {
                 "created": 1666322134,
@@ -161,8 +200,13 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.put")
-    def test_update_data_asset(self, mock_api_put):
-        def map_to_success_message(url, json):
+    def test_update_data_asset(
+        self, mock_api_put: unittest.mock.MagicMock
+    ) -> None:
+        """Tests update_data_asset_method"""
+
+        def map_to_success_message(url: str, json: dict) -> dict:
+            """Map to a success message"""
             data_asset_id = url.split("/")[-1]
             success_response = {
                 "created": 1633277005,
@@ -218,8 +262,11 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.post")
-    def test_run_capsule(self, mock_api_post):
-        def map_to_success_message(input_json):
+    def test_run_capsule(self, mock_api_post: unittest.mock.MagicMock) -> None:
+        """Tests run_capsule method."""
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
 
             success_message = {
                 "created": 1646943238,
@@ -240,7 +287,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
         response = self.co_client.run_capsule(
-            capsule_id=example_capsule_id, data_assets=[], parameters=['FOO']
+            capsule_id=example_capsule_id, data_assets=[], parameters=["FOO"]
         )
         expected_response = {
             "created": 1646943238,
@@ -254,8 +301,11 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.get")
-    def test_get_capsule(self, mock_api_get):
-        def map_to_success_message(url):
+    def test_get_capsule(self, mock_api_get: unittest.mock.MagicMock) -> None:
+        """Tests get_capsule method."""
+
+        def map_to_success_message(url: str) -> dict:
+            """Map to a success message"""
             capsule_id = url.split("/")[-1]
             success_response = {
                 "cloned_from_url": "",
@@ -302,7 +352,10 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.get")
-    def test_get_capsule_computations(self, mock_api_get):
+    def test_get_capsule_computations(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Test get_capsule_computations method."""
 
         expected_response = [
             {
@@ -331,7 +384,8 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             },
         ]
 
-        def map_to_success_message(url):
+        def map_to_success_message(_) -> List[dict]:
+            """Map to a success message"""
             return expected_response
 
         mocked_success_get = self.mock_success_response(
@@ -350,8 +404,13 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.get")
-    def test_get_computation(self, mock_api_get):
-        def map_to_success_message(url):
+    def test_get_computation(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Tests get_computation_method"""
+
+        def map_to_success_message(url: str) -> dict:
+            """Map to a success message"""
             computation_id = url.split("/")[-1]
             success_response = {
                 "created": 1668125314,
@@ -398,7 +457,10 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.post")
-    def test_get_list_result_items(self, mock_api_post):
+    def test_get_list_result_items(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests get_list_result_items_method"""
         expected_response = {
             "items": [
                 {
@@ -416,7 +478,8 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             ]
         }
 
-        def map_to_success_message(json):
+        def map_to_success_message(_) -> dict:
+            """Map to a success message"""
             success_response = expected_response
             return success_response
 
@@ -433,7 +496,10 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.get")
-    def test_get_result_file_download_url(self, mock_api_get):
+    def test_get_result_file_download_url(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Tests get_result_file_download_url method"""
 
         expected_response_url = (
             "https://s3.us-west-2.amazonaws.com/BUCKET/A-BUNCH-OF-STUFF"
@@ -441,7 +507,8 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         expected_response = {"url": expected_response_url}
 
-        def map_to_success_message(url):
+        def map_to_success_message(_) -> dict:
+            """Map to a success message"""
             success_response = expected_response
             return success_response
 
