@@ -1,16 +1,14 @@
 """Module to interface with CodeOcean's backend.
 """
+from typing import Dict, List, Optional
+
 import requests
-from typing import List, Dict, Optional
 
 
 class CodeOceanClient:
     """Client that will connect to CodeOcean"""
 
-    def __init__(self,
-                 domain: str,
-                 token: str,
-                 api_version: int = 1) -> None:
+    def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
         Base client for CodeOcean's API
         Parameters
@@ -28,7 +26,8 @@ class CodeOceanClient:
         self.asset_url = f"{self.domain}/api/v{self.api_version}/data_assets"
         self.capsule_url = f"{self.domain}/api/v{self.api_version}/capsules"
         self.computation_url = (
-            f"{self.domain}/api/v{self.api_version}/computations")
+            f"{self.domain}/api/v{self.api_version}/computations"
+        )
 
     def get_data_asset(self, data_asset_id: str) -> requests.models.Response:
         """
@@ -48,18 +47,19 @@ class CodeOceanClient:
         response = requests.get(url, auth=(self.token, ""))
         return response
 
-    def register_data_asset(self,
-                            asset_name: str,
-                            mount: str,
-                            bucket: str,
-                            prefix: str,
-                            access_key_id: Optional[str] = None,
-                            secret_access_key: Optional[str] = None,
-                            tags: Optional[List[str]] = None,
-                            asset_description: Optional[str] = "",
-                            keep_on_external_storage: Optional[bool] = True,
-                            index_data: Optional[bool] = True
-                            ) -> requests.models.Response:
+    def register_data_asset(
+        self,
+        asset_name: str,
+        mount: str,
+        bucket: str,
+        prefix: str,
+        access_key_id: Optional[str] = None,
+        secret_access_key: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        asset_description: Optional[str] = "",
+        keep_on_external_storage: Optional[bool] = True,
+        index_data: Optional[bool] = True,
+    ) -> requests.models.Response:
         """
         Parameters
         ---------------
@@ -102,27 +102,27 @@ class CodeOceanClient:
                     "bucket": bucket,
                     "prefix": prefix,
                     "keep_on_external_storage": keep_on_external_storage,
-                    "index_data": index_data
+                    "index_data": index_data,
                 },
             },
         }
 
         if access_key_id and secret_access_key:
-            json_data['source']['aws']['access_key_id'] = access_key_id
-            json_data['source']['aws']['secret_access_key'] = secret_access_key
+            json_data["source"]["aws"]["access_key_id"] = access_key_id
+            json_data["source"]["aws"]["secret_access_key"] = secret_access_key
 
-        response = requests.post(self.asset_url,
-                                 json=json_data,
-                                 auth=(self.token, ""))
+        response = requests.post(
+            self.asset_url, json=json_data, auth=(self.token, "")
+        )
         return response
 
     def update_data_asset(
-            self,
-            data_asset_id: str,
-            new_name: str,
-            new_description: Optional[str] = None,
-            new_tags: Optional[List[str]] = None,
-            new_mount: Optional[str] = None
+        self,
+        data_asset_id: str,
+        new_name: str,
+        new_description: Optional[str] = None,
+        new_tags: Optional[List[str]] = None,
+        new_mount: Optional[str] = None,
     ) -> requests.models.Response:
         """
         This will update a data asset from a PUT request to code ocean API.
@@ -145,32 +145,26 @@ class CodeOceanClient:
         """
 
         url = f"{self.asset_url}/{data_asset_id}"
-        data = {
-            'name': new_name
-        }
+        data = {"name": new_name}
 
         if new_description:
-            data['description'] = new_description
+            data["description"] = new_description
 
         if new_tags:
-            data['tags'] = new_tags
+            data["tags"] = new_tags
 
         if new_mount:
-            data['mount'] = new_mount
+            data["mount"] = new_mount
 
-        response = requests.put(
-            url,
-            json=data,
-            auth=(self.token, "")
-        )
+        response = requests.put(url, json=data, auth=(self.token, ""))
 
         return response
 
     def run_capsule(
-            self,
-            capsule_id: str,
-            data_assets: List[Dict],
-            parameters: Optional[List] = None,
+        self,
+        capsule_id: str,
+        data_assets: List[Dict],
+        parameters: Optional[List] = None,
     ) -> requests.models.Response:
         """
         This will run a capsule/pipeline using a POST request to code ocean
@@ -206,24 +200,18 @@ class CodeOceanClient:
         requests.models.Response
         """
 
-        data = {
-            'capsule_id': capsule_id,
-            'data_assets': data_assets
-        }
+        data = {"capsule_id": capsule_id, "data_assets": data_assets}
 
         if parameters:
-            data['parameters'] = parameters
+            data["parameters"] = parameters
 
         response = requests.post(
-            url=self.computation_url,
-            json=data,
-            auth=(self.token, "")
+            url=self.computation_url, json=data, auth=(self.token, "")
         )
 
         return response
 
-    def get_capsule(self,
-                    capsule_id: str) -> requests.models.Response:
+    def get_capsule(self, capsule_id: str) -> requests.models.Response:
         """
         This will get metadata from a GET request to code ocean API.
 
@@ -241,8 +229,9 @@ class CodeOceanClient:
         response = requests.get(url, auth=(self.token, ""))
         return response
 
-    def get_capsule_computations(self,
-                                 capsule_id: str) -> requests.models.Response:
+    def get_capsule_computations(
+        self, capsule_id: str
+    ) -> requests.models.Response:
         """
         This will get computation's metadata from a GET request to codeocean
         API.
@@ -279,8 +268,9 @@ class CodeOceanClient:
         response = requests.get(url, auth=(self.token, ""))
         return response
 
-    def get_list_result_items(self,
-                              computation_id: str) -> requests.models.Response:
+    def get_list_result_items(
+        self, computation_id: str
+    ) -> requests.models.Response:
         """
         This will get a list of the computation's metadata from a POST request
         to code ocean API.
@@ -299,10 +289,9 @@ class CodeOceanClient:
         response = requests.post(url, auth=(self.token, ""))
         return response
 
-    def get_result_file_download_url(self,
-                                     computation_id: str,
-                                     path_to_file: str
-                                     ) -> requests.models.Response:
+    def get_result_file_download_url(
+        self, computation_id: str, path_to_file: str
+    ) -> requests.models.Response:
         """
         This will get download link for a file from a GET request to
         codeocean API.
