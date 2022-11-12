@@ -3,8 +3,8 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "code_ocean_api"
-description = "Code ocean API manager in Python"
+name = "aind_codeocean_api"
+description = "CodeOcean API manager in Python"
 license = {text = "MIT"}
 requires-python = ">=3.7"
 authors = [
@@ -13,7 +13,8 @@ authors = [
 classifiers = [
     "Programming Language :: Python :: 3"
 ]
-dynamic = ["version", "readme"]
+readme = "README.md"
+dynamic = ["version"]
 
 dependencies = [
     'requests'
@@ -34,8 +35,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.dynamic]
-version = {attr = "code_ocean_api.__version__"}
-readme = {file = ["README.md"]}
+version = {attr = "aind_codeocean_api.__version__"}
 
 [tool.black]
 line-length = 79
@@ -60,7 +60,7 @@ exclude = '''
 
 [tool.coverage.run]
 omit = ["*__init__*"]
-source = ["code_ocean_api", "tests"]
+source = ["aind_codeocean_api", "tests"]
 
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:"]
@@ -68,6 +68,7 @@ fail_under = 100
 
 [tool.isort]
 line_length = 79
+profile = "black"
 
 [tool.interrogate]
 exclude = ["setup.py", "docs", "build"]
