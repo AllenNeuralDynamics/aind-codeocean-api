@@ -116,6 +116,57 @@ class CodeOceanClient:
         )
         return response
 
+    def register_result_as_data_asset(
+        self,
+        computation_id: str,
+        asset_name: str,
+        asset_description: Optional[str] = "",
+        mount: Optional[str] = None,
+        tags: Optional[List] = None,
+    ) -> requests.models.Response:
+        """
+        Parameters
+        ---------------
+        computation_id : string
+            Computation id
+        asset_name : string
+            Name of the data asset.
+        asset_description : Optional[str]
+            A description of the data asset. Default blanks.
+        mount : string
+            Mount point. Default None (Mount point equal to the asset name)
+        tags : Optional[List[str]]
+            A list of tags to attach to the data asset.
+            Default None (empty list).
+
+        keep_on_external_storage : Optional[bool]
+            Keep data asset on external storage. Defaults to True.
+        index_data : Optional[bool]
+            Whether to index the data asset. Defaults to True.
+        Returns
+        ---------------
+        requests.models.Response
+        """
+
+        tags_to_attach = [] if tags is None else tags
+
+        if mount is None:
+            mount = asset_name
+
+        json_data = {
+            "name": asset_name,
+            "description": asset_description,
+            "mount": mount,
+            "tags": tags_to_attach,
+            "source": {"computation": {"id": computation_id}},
+        }
+
+        response = requests.post(
+            self.asset_url, json=json_data, auth=(self.token, "")
+        )
+
+        return response
+
     def update_data_asset(
         self,
         data_asset_id: str,
