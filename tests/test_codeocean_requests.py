@@ -529,6 +529,66 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.content, expected_response)
         self.assertEqual(response.status_code, 200)
 
+    @mock.patch("requests.post")
+    def test_register_result_as_data_asset(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of registering a result as data asset"""
+        asset_name = "ASSET_NAME"
+        mount = "MOUNT_NAME"
+
+        input_json_data = {
+            "name": asset_name,
+            "description": "",
+            "mount": mount,
+            "tags": [],
+            "source": {
+                "computation": {"id": "44ec16c3-cb5a-4000-93d1-cba8be800c00"}
+            },
+        }
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
+            tags_to_attach = (
+                None if not len(input_json["tags"]) else input_json["tags"]
+            )
+
+            success_message = {
+                "created": 1668529000,
+                "description": "",
+                "id": "cefd51ae-35b1-45b9-b82b-2de14f000z000",
+                "last_used": 0,
+                "name": "",
+                "state": "draft",
+                "tags": tags_to_attach,
+                "type": "result",
+            }
+            return success_message
+
+        expected_request_response = {
+            "created": 1668529000,
+            "description": "",
+            "id": "cefd51ae-35b1-45b9-b82b-2de14f000z000",
+            "last_used": 0,
+            "name": "",
+            "state": "draft",
+            "tags": None,
+            "type": "result",
+        }
+
+        mocked_success_post = self.mock_success_response(
+            map_to_success_message, req_type="post"
+        )
+        mock_api_post.return_value = mocked_success_post(json=input_json_data)
+
+        computation_id = "83dc2b36-b2e0-459c-8d9e-9381b000w00e0"
+        response = self.co_client.register_result_as_data_asset(
+            computation_id=computation_id,
+            asset_name=asset_name,
+        )
+        self.assertEqual(response.content, expected_request_response)
+        self.assertEqual(response.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
