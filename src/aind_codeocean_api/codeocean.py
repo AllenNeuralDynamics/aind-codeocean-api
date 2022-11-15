@@ -1,6 +1,7 @@
 """Module to interface with CodeOcean's backend.
 """
 from typing import Dict, List, Optional
+
 import requests
 
 
@@ -117,11 +118,11 @@ class CodeOceanClient:
 
     def register_result_as_data_asset(
         self,
-        computation_id:str,
-        asset_name:str,
-        asset_description:Optional[str]='',
-        mount:Optional[str]=None,
-        tags:Optional[List]=None,
+        computation_id: str,
+        asset_name: str,
+        asset_description: Optional[str] = "",
+        mount: Optional[str] = None,
+        tags: Optional[List] = None,
     ) -> requests.models.Response:
         """
         Parameters
@@ -137,7 +138,7 @@ class CodeOceanClient:
         tags : Optional[List[str]]
             A list of tags to attach to the data asset.
             Default None (empty list).
-        
+
         keep_on_external_storage : Optional[bool]
             Keep data asset on external storage. Defaults to True.
         index_data : Optional[bool]
@@ -148,8 +149,8 @@ class CodeOceanClient:
         """
 
         tags_to_attach = [] if tags is None else tags
-        
-        if mount == None:
+
+        if mount is None:
             mount = asset_name
 
         json_data = {
@@ -157,11 +158,7 @@ class CodeOceanClient:
             "description": asset_description,
             "mount": mount,
             "tags": tags_to_attach,
-            "source": {
-                "computation": {
-                    "id": computation_id
-                }
-            }
+            "source": {"computation": {"id": computation_id}},
         }
 
         response = requests.post(
@@ -367,4 +364,3 @@ class CodeOceanClient:
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
         return response
-
