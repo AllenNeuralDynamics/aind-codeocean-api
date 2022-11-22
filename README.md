@@ -6,17 +6,17 @@
 Python wrapper around CodeOcean's REST API.
 
 ## Installation
-To use the software, in the root directory, run
-```
-pip install -e .
-```
-
 To install from [PyPI](https://pypi.org/project/aind-codeocean-api/), run:
 ```
 pip install aind-codeocean-api
 ```
 
-To develop the code, run
+To install from a clone of the repository, in the root directory, run
+```
+pip install -e .
+```
+
+To install the development libraries of the code, run
 ```
 pip install -e .[dev]
 ```
@@ -25,6 +25,7 @@ pip install -e .[dev]
 Example of getting data asset metadata:
 ```
 from aind_codeocean_api.codeocean import CodeOceanClient
+
 domain = "https://acmecorp.codeocean.com"
 token = "AN_API_TOKEN" # Replace with your api token
 data_asset_id = "37a93748-ce90-4980-913b-2de0908d5212"
