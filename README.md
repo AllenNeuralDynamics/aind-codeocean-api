@@ -3,10 +3,7 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 ![Code Style](https://img.shields.io/badge/code%20style-black-black)
 
-Python wrapper around CodeOcean's REST API. <br> Available on [PyPI](https://pypi.org/project/aind-codeocean-api/). To install, run 
-```
-pip install aind-codeocean-api
-```
+Python wrapper around CodeOcean's REST API.
 
 ## Installation
 To use the software, in the root directory, run
@@ -14,7 +11,7 @@ To use the software, in the root directory, run
 pip install -e .
 ```
 
-To install from pypi:
+To install from [PyPI](https://pypi.org/project/aind-codeocean-api/), run:
 ```
 pip install aind-codeocean-api
 ```
