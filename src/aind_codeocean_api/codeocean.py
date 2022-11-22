@@ -232,20 +232,15 @@ class CodeOceanClient:
         parameters : List
             Parameters given to the capsule. Default None which means
             the capsule runs with no parameters.
-
             The parameters should match in order to the parameters given in the
-            capsule.
-
-            e.g.
+            capsule, e.g.
             'parameters': [
-                'input_folder',
-                'output_folder',
-                'bucket_name'
+            'input_folder',
+            'output_folder',
+            'bucket_name'
             ]
-
             where position one refers to the parameter #1 ('input_folder'),
             parameter #2 ('output_folder'), and parameter #3 ('bucket_name')
-
         Returns
         ---------------
         requests.models.Response
