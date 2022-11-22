@@ -14,9 +14,26 @@ To use the software, in the root directory, run
 pip install -e .
 ```
 
+To install from pypi:
+```
+pip install aind-codeocean-api
+```
+
 To develop the code, run
 ```
 pip install -e .[dev]
+```
+
+## Usage
+Example of getting data asset metadata:
+```
+from aind_codeocean_api.codeocean import CodeOceanClient
+domain = "https://acmecorp.codeocean.com"
+token = "AN_API_TOKEN" # Replace with your api token
+data_asset_id = "37a93748-ce90-4980-913b-2de0908d5212"
+co_client = CodeOceanClient(domain=domain, token=token)
+response = co_client.get_data_asset(data_asset_id=data_asset_id)
+metadata = response.json()
 ```
 
 ## Contributing
