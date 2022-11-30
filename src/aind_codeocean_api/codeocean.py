@@ -6,7 +6,7 @@ import requests
 
 
 class CodeOceanClient:
-    """Client that will connect to CodeOcean"""
+    """Client that will connect to Code Ocean"""
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
@@ -14,11 +14,11 @@ class CodeOceanClient:
         Parameters
         ----------
         domain : str
-          VPC domain
+            VPC domain
         token : str
-          API token
+            API token
         api_version : int
-          CodeOcean API version
+            Code Ocean API version
         """
         self.domain = domain
         self.token = token
@@ -31,7 +31,7 @@ class CodeOceanClient:
 
     def get_data_asset(self, data_asset_id: str) -> requests.models.Response:
         """
-        This will get data from a GET request to code ocean API.
+        This will get data from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -176,7 +176,7 @@ class CodeOceanClient:
         new_mount: Optional[str] = None,
     ) -> requests.models.Response:
         """
-        This will update a data asset from a PUT request to code ocean API.
+        This will update a data asset from a PUT request to Code Ocean API.
 
         Parameters
         ---------------
@@ -218,7 +218,7 @@ class CodeOceanClient:
         parameters: Optional[List] = None,
     ) -> requests.models.Response:
         """
-        This will run a capsule/pipeline using a POST request to code ocean
+        This will run a capsule/pipeline using a POST request to Code Ocean
         API.
 
         Parameters
@@ -264,7 +264,7 @@ class CodeOceanClient:
 
     def get_capsule(self, capsule_id: str) -> requests.models.Response:
         """
-        This will get metadata from a GET request to code ocean API.
+        This will get metadata from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -284,7 +284,7 @@ class CodeOceanClient:
         self, capsule_id: str
     ) -> requests.models.Response:
         """
-        This will get computation's metadata from a GET request to codeocean
+        This will get computation's metadata from a GET request to Code Ocean
         API.
 
         Parameters
@@ -303,7 +303,7 @@ class CodeOceanClient:
 
     def get_computation(self, computation_id: str) -> requests.models.Response:
         """
-        This will get metadata from a GET request to code ocean API.
+        This will get metadata from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -324,7 +324,7 @@ class CodeOceanClient:
     ) -> requests.models.Response:
         """
         This will get a list of the computation's metadata from a POST request
-        to code ocean API.
+        to Code Ocean API.
 
         Parameters
         ---------------
@@ -345,7 +345,7 @@ class CodeOceanClient:
     ) -> requests.models.Response:
         """
         This will get download link for a file from a GET request to
-        codeocean API.
+        Code Ocean API.
 
         Parameters
         ---------------
@@ -353,7 +353,7 @@ class CodeOceanClient:
             ID of the computation
 
         path_to_file : string
-            Path of the file under /results folder in code ocean capsule
+            Path of the file under /results folder in Code Ocean capsule
 
         Returns
         ---------------
