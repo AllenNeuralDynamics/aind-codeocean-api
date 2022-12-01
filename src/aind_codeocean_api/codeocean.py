@@ -1,4 +1,4 @@
-"""Module to interface with CodeOcean's backend.
+"""Module to interface with Code Ocean's backend.
 """
 from typing import Dict, List, Optional
 
@@ -10,7 +10,7 @@ class CodeOceanClient:
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
-        Base client for CodeOcean's API
+        Base client for Code Ocean's API
         Parameters
         ----------
         domain : str
@@ -45,6 +45,29 @@ class CodeOceanClient:
 
         url = f"{self.asset_url}/{data_asset_id}"
         response = requests.get(url, auth=(self.token, ""))
+        return response
+
+    def search_data_assets(
+        self, 
+        data_asset_id: str, 
+        start_index: Optional[int] = None,
+        limit_index: Optional[int] = None,
+        sort_field: Optional[str] = None,
+        sort_order: Optional[str] = None,
+        query: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
+        favorite: Optional[bool] = None,
+        archived: Optional[bool] = None,
+    )
+        query_params = {}
+
+        if start_index and limit_index:
+            query_params["start"] = start_index
+            query_params["limit"] = limit_index
+        
+        response = requests.get(url, params=query_params, auth=(self.token, ""))
+
         return response
 
     def register_data_asset(
