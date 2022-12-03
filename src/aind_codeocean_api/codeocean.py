@@ -48,25 +48,37 @@ class CodeOceanClient:
         return response
 
     def search_data_assets(
-        self, 
-        data_asset_id: str, 
-        start_index: Optional[int] = None,
-        limit_index: Optional[int] = None,
-        sort_field: Optional[str] = None,
-        sort_order: Optional[str] = None,
+        self,
+        start_index: Optional[int] = 0,
+        limit_index: Optional[int] = 10,
+        sort_field: Optional[str] = "desc",
+        sort_order: Optional[str] = "name",
         query: Optional[str] = None,
-        type: Optional[str] = None,
-        ownership: Optional[str] = None,
+        result_type: Optional[str] = "dataset",
+        ownership: Optional[str] = "owner",
         favorite: Optional[bool] = None,
         archived: Optional[bool] = None,
-    )
-        query_params = {}
+    ):
 
-        if start_index and limit_index:
-            query_params["start"] = start_index
-            query_params["limit"] = limit_index
+        query_params = {
+            "start": start_index,
+            "limit": limit_index,
+            "sort_order": sort_order,
+            "sort_field": sort_field,
+            "type": result_type,
+            "ownership": ownership,
+        }
+
+        if query:
+            query_params["query"] = query
         
-        response = requests.get(url, params=query_params, auth=(self.token, ""))
+        if favorite:
+            query_params["favorite"] = favorite
+        
+        if archived:
+            query_params["archived"] = archived
+        
+        response = requests.get(self.asset_url, params=query_params, auth=(self.token, ""))
 
         return response
 
