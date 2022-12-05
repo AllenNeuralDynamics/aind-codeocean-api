@@ -58,15 +58,46 @@ class CodeOceanClient:
         favorite: Optional[bool] = None,
         archived: Optional[bool] = None,
         query: Optional[str] = None,
-    ):
+    ) -> requests.models.Response:
+        """
+        This will return data assets from a GET requets to Code Ocean API.
+
+        Parameters
+        ---------------
+        start : Optional[int]
+            Describes the search from index.
+        limit : Optional[int]
+            Describes the upper limit to search.
+        sort_order : Optional[str]
+            Determines the result sort order.
+        sort_field : Optional[str]
+            Determines the field to sort by.
+        type : Optional[str]
+            Type of data asset: dataset or result.
+            Returns both if omitted.
+        ownership : Optional[str]
+            Search data asset by ownership: owner or shared.
+        favorite : Optional[bool]
+            Search only favorite data assets.
+        archived : Optional[bool]
+            Search only archived data assets.
+        query : Optional[str]
+            Determines the search query.
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
         optional_params = locals()
         query_params = {}
 
         for param, val in optional_params.items():
             if val is not None:
                 query_params[param] = val
-        
-        response = requests.get(self.asset_url, params=query_params, auth=(self.token, ""))
+
+        response = requests.get(
+            self.asset_url, params=query_params, auth=(self.token, "")
+        )
 
         return response
 
