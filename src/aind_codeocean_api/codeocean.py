@@ -69,13 +69,13 @@ class CodeOceanClient:
             "ownership": ownership,
         }
 
-        if query:
+        if query is not None:
             query_params["query"] = query
         
-        if favorite:
+        if favorite is not None:
             query_params["favorite"] = favorite
         
-        if archived:
+        if archived is not None:
             query_params["archived"] = archived
         
         response = requests.get(self.asset_url, params=query_params, auth=(self.token, ""))
