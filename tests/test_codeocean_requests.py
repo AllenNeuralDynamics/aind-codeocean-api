@@ -38,14 +38,14 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         Parameters
         ----------
         map_input_to_success_message : Callable
-          A function that maps inputs to a dict
+            A function that maps inputs to a dict
         req_type : str
-          TODO: Change this to an enum
+            TODO: Change this to an enum
 
         Returns
         -------
         Callable
-          A function that maps to a MockResponse
+            A function that maps to a MockResponse
 
         """
 
@@ -191,6 +191,62 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             "last_used": 0,
             "name": "ecephys_632269_2022-10-10_16-13-22",
             "size": 3632927966,
+            "state": "ready",
+            "tags": ["ecephys", "raw"],
+            "type": "dataset",
+        }
+
+        self.assertEqual(response.content, expected_response)
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch("requests.get")
+    def test_search_data_assets(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Tests search_data_assets method."""
+
+        def map_to_success_message(url: str) -> dict:
+            """Map to a success message"""
+            success_response = {
+                "created": 1670206314,
+                "description": "",
+                "files": 1551,
+                "id": "6260cf28-de91-4528-9286-9c09869e00ec",
+                "last_used": 0,
+                "name": "ecephys_632269_2022-10-10_16-13-22",
+                "size": 3632927970,
+                "state": "ready",
+                "tags": ["ecephys", "raw"],
+                "type": "dataset",
+            }
+            return success_response
+
+        mocked_success_get = self.mock_success_response(
+            map_to_success_message, req_type="get"
+        )
+
+        example_data_asset_id = "6260cf28-de91-4528-9286-9c09869e00ec"
+
+        example_query = "ecephys"
+        example_favorite = True
+        example_archived = True
+
+        mock_api_get.return_value = mocked_success_get(
+            url=f"{self.co_client.asset_url}"
+        )
+
+        response = self.co_client.search_data_assets(
+            query=example_query, favorite=example_favorite, archived=example_archived
+        )
+
+        expected_response = {
+            "created": 1670206314,
+            "description": "",
+            "files": 1551,
+            "id": example_data_asset_id,
+            "last_used": 0,
+            "name": "ecephys_632269_2022-10-10_16-13-22",
+            "size": 3632927970,
             "state": "ready",
             "tags": ["ecephys", "raw"],
             "type": "dataset",
