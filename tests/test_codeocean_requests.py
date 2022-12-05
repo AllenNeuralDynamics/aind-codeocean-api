@@ -235,7 +235,9 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         response = self.co_client.search_data_assets(
-            query=example_query, favorite=example_favorite, archived=example_archived
+            query=example_query,
+            favorite=example_favorite,
+            archived=example_archived,
         )
 
         expected_response = {
