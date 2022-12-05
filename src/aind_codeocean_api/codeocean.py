@@ -49,34 +49,22 @@ class CodeOceanClient:
 
     def search_data_assets(
         self,
-        start_index: Optional[int] = 0,
-        limit_index: Optional[int] = 10,
-        sort_field: Optional[str] = "desc",
-        sort_order: Optional[str] = "name",
-        query: Optional[str] = None,
-        result_type: Optional[str] = "dataset",
-        ownership: Optional[str] = "owner",
+        start: Optional[int] = None,
+        limit: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        sort_field: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
         favorite: Optional[bool] = None,
         archived: Optional[bool] = None,
+        query: Optional[str] = None,
     ):
+        optional_params = locals()
+        query_params = {}
 
-        query_params = {
-            "start": start_index,
-            "limit": limit_index,
-            "sort_order": sort_order,
-            "sort_field": sort_field,
-            "type": result_type,
-            "ownership": ownership,
-        }
-
-        if query is not None:
-            query_params["query"] = query
-        
-        if favorite is not None:
-            query_params["favorite"] = favorite
-        
-        if archived is not None:
-            query_params["archived"] = archived
+        for param, val in optional_params.items():
+            if val is not None:
+                query_params[param] = val
         
         response = requests.get(self.asset_url, params=query_params, auth=(self.token, ""))
 
@@ -394,3 +382,15 @@ class CodeOceanClient:
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
         return response
+
+def main():
+    from credentials import CodeOceanCredentials
+    codeocean_client = CodeOceanCredentials()
+
+    co_api = CodeOceanClient(codeocean_client.credentials["domain"], codeocean_client.credentials["token"])
+    response = co_api.search_data_assets(start=0, limit=30)
+    print(response)
+    print(response.json())
+
+if __name__ == '__main__':
+    main()
