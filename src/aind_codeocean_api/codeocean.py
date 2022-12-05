@@ -382,15 +382,3 @@ class CodeOceanClient:
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
         return response
-
-def main():
-    from credentials import CodeOceanCredentials
-    codeocean_client = CodeOceanCredentials()
-
-    co_api = CodeOceanClient(codeocean_client.credentials["domain"], codeocean_client.credentials["token"])
-    response = co_api.search_data_assets(start=0, limit=30)
-    print(response)
-    print(response.json())
-
-if __name__ == '__main__':
-    main()

@@ -226,7 +226,6 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         example_data_asset_id = "6260cf28-de91-4528-9286-9c09869e00ec"
-
         example_query = "ecephys"
         example_favorite = True
         example_archived = True
