@@ -1,4 +1,4 @@
-"""Module to interface with CodeOcean's backend.
+"""Module to interface with Code Ocean's backend.
 """
 from typing import Dict, List, Optional
 
@@ -6,19 +6,19 @@ import requests
 
 
 class CodeOceanClient:
-    """Client that will connect to CodeOcean"""
+    """Client that will connect to Code Ocean"""
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
-        Base client for CodeOcean's API
+        Base client for Code Ocean's API
         Parameters
         ----------
         domain : str
-          VPC domain
+            VPC domain
         token : str
-          API token
+            API token
         api_version : int
-          CodeOcean API version
+            Code Ocean API version
         """
         self.domain = domain
         self.token = token
@@ -31,7 +31,7 @@ class CodeOceanClient:
 
     def get_data_asset(self, data_asset_id: str) -> requests.models.Response:
         """
-        This will get data from a GET request to code ocean API.
+        This will get data from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -45,6 +45,60 @@ class CodeOceanClient:
 
         url = f"{self.asset_url}/{data_asset_id}"
         response = requests.get(url, auth=(self.token, ""))
+        return response
+
+    def search_data_assets(
+        self,
+        start: Optional[int] = None,
+        limit: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        sort_field: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
+        favorite: Optional[bool] = None,
+        archived: Optional[bool] = None,
+        query: Optional[str] = None,
+    ) -> requests.models.Response:
+        """
+        This will return data assets from a GET requets to Code Ocean API.
+
+        Parameters
+        ---------------
+        start : Optional[int]
+            Describes the search from index.
+        limit : Optional[int]
+            Describes the upper limit to search.
+        sort_order : Optional[str]
+            Determines the result sort order.
+        sort_field : Optional[str]
+            Determines the field to sort by.
+        type : Optional[str]
+            Type of data asset: dataset or result.
+            Returns both if omitted.
+        ownership : Optional[str]
+            Search data asset by ownership: owner or shared.
+        favorite : Optional[bool]
+            Search only favorite data assets.
+        archived : Optional[bool]
+            Search only archived data assets.
+        query : Optional[str]
+            Determines the search query.
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+        optional_params = locals()
+        query_params = {}
+
+        for param, val in optional_params.items():
+            if val is not None:
+                query_params[param] = val
+
+        response = requests.get(
+            self.asset_url, params=query_params, auth=(self.token, "")
+        )
+
         return response
 
     def register_data_asset(
@@ -176,7 +230,7 @@ class CodeOceanClient:
         new_mount: Optional[str] = None,
     ) -> requests.models.Response:
         """
-        This will update a data asset from a PUT request to code ocean API.
+        This will update a data asset from a PUT request to Code Ocean API.
 
         Parameters
         ---------------
@@ -218,7 +272,7 @@ class CodeOceanClient:
         parameters: Optional[List] = None,
     ) -> requests.models.Response:
         """
-        This will run a capsule/pipeline using a POST request to code ocean
+        This will run a capsule/pipeline using a POST request to Code Ocean
         API.
 
         Parameters
@@ -259,7 +313,7 @@ class CodeOceanClient:
 
     def get_capsule(self, capsule_id: str) -> requests.models.Response:
         """
-        This will get metadata from a GET request to code ocean API.
+        This will get metadata from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -279,7 +333,7 @@ class CodeOceanClient:
         self, capsule_id: str
     ) -> requests.models.Response:
         """
-        This will get computation's metadata from a GET request to codeocean
+        This will get computation's metadata from a GET request to Code Ocean
         API.
 
         Parameters
@@ -298,7 +352,7 @@ class CodeOceanClient:
 
     def get_computation(self, computation_id: str) -> requests.models.Response:
         """
-        This will get metadata from a GET request to code ocean API.
+        This will get metadata from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -319,7 +373,7 @@ class CodeOceanClient:
     ) -> requests.models.Response:
         """
         This will get a list of the computation's metadata from a POST request
-        to code ocean API.
+        to Code Ocean API.
 
         Parameters
         ---------------
@@ -340,7 +394,7 @@ class CodeOceanClient:
     ) -> requests.models.Response:
         """
         This will get download link for a file from a GET request to
-        codeocean API.
+        Code Ocean API.
 
         Parameters
         ---------------
@@ -348,7 +402,7 @@ class CodeOceanClient:
             ID of the computation
 
         path_to_file : string
-            Path of the file under /results folder in code ocean capsule
+            Path of the file under /results folder in Code Ocean capsule
 
         Returns
         ---------------
