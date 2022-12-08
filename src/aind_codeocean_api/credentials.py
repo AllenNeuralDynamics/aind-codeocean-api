@@ -29,3 +29,14 @@ class CodeOceanCredentials:
             "CODEOCEAN_CREDENTIALS_PATH", "credentials.json"
         )
         self.credentials = self._load_json(self.credentials_path)
+
+    def create_credentials():
+        file_location = input("Location: ")
+        domain = input("Domain: ")
+        access_token = input("API Access Token: ")
+
+        if not file_location:
+            file_location = "{$HOME}/.codeocean/"
+        
+        with open(os.path.join(file_location, "credentials.json"), "w") as as output:
+            json.dump({ "domain": domain, "token": access_token}, output)
