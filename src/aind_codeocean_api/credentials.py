@@ -5,11 +5,12 @@ from pathlib import Path
 from typing import Optional
 
 CREDENTIALS_FILENAME = "credentials.json"
+CREDENTIALS_DIR = ".codeocean"
 
 if os.environ.get("CODEOCEAN_CREDENTIALS_PATH"):
     CREDENTIALS_FILEPATH = os.environ.get("CODEOCEAN_CREDENTIALS_PATH")
 else:
-    CREDENTIALS_FILEPATH = Path.home() / CREDENTIALS_FILENAME
+    CREDENTIALS_FILEPATH = Path.home() / CREDENTIALS_DIR
 
 
 class CodeOceanCredentials:
@@ -64,18 +65,19 @@ class CodeOceanCredentials:
         if not file_location:
             file_location = CREDENTIALS_FILEPATH
 
-        # TO-DO: function to check url, indentation to json to format it
+        # TO-DO: function to check url, indentation to format json
         if not os.path.isdir(file_location):
             os.mkdir(file_location)
 
         with open(
             os.path.join(file_location, CREDENTIALS_FILENAME), "w"
         ) as output:
-            json.dump({"domain": api_domain, "token": access_token}, output)
+            json.dump({"domain": api_domain, "token": access_token}, output, indent=4)
 
 
 def main():
     """Prompts user and calls create credentials method"""
+
     file_path = input(
         """Enter a file path to which your credentials will be saved.
         This defaults to `$HOME/.codeocean`:"""
