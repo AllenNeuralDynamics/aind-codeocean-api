@@ -44,7 +44,7 @@ class CodeOceanCredentials:
         file_location: Optional[str] = None,
     ):
         """
-        This will take in credentials information from
+        Takes in credential information from
         user input and create a credentials.json file.
 
         Parameters
@@ -69,7 +69,7 @@ class CodeOceanCredentials:
             os.mkdir(file_location)
 
         with open(
-            os.path.join(file_location, "credentials.json"), "w"
+            os.path.join(file_location, CREDENTIALS_FILENAME), "w"
         ) as output:
             json.dump({"domain": api_domain, "token": access_token}, output)
 
