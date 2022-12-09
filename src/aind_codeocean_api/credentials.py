@@ -53,7 +53,7 @@ class CodeOceanCredentials:
             API domain
         access_token : string
             API Access Token
-        file_locaiton: string
+        file_location : Optional[str]
             File path where credentials.json file is written to
 
         Returns
@@ -77,7 +77,8 @@ class CodeOceanCredentials:
 def main():
     """Prompts user and calls create credentials method"""
     file_path = input(
-        "Enter a file path to which your credentials will be saved: "
+        """Enter a file path to which your credentials will be saved.
+        This defaults to `$HOME/.codeocean`:"""
     )
     domain = input("Enter your domain: ")
     token = input("Enter your API Access Token: ")
