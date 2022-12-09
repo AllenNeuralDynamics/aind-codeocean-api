@@ -61,26 +61,27 @@ class CodeOceanCredentials:
         ---------------
         credentials.json
         """
+        if not os.path.exists(file_location):
+            file_location = os.path.join(Path.home(), file_location)
+            os.makedirs(file_location)
 
         if not file_location:
             file_location = CREDENTIALS_FILEPATH
 
-        # TO-DO: function to check url, indentation to format json
-        if not os.path.isdir(file_location):
-            os.mkdir(file_location)
-
         with open(
             os.path.join(file_location, CREDENTIALS_FILENAME), "w"
         ) as output:
-            json.dump({"domain": api_domain, "token": access_token}, output, indent=4)
+            json.dump(
+                {"domain": api_domain, "token": access_token}, output, indent=4
+            )
 
 
 def main():
     """Prompts user and calls create credentials method"""
 
     file_path = input(
-        """Enter a file path to which your credentials will be saved.
-        This defaults to `$HOME/.codeocean`:"""
+        """Enter a file path to which your credentials
+        will be saved. This defaults to `$HOME/.codeocean`:"""
     )
     domain = input("Enter your domain: ")
     token = input("Enter your API Access Token: ")
