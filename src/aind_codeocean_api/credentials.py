@@ -63,7 +63,7 @@ class CodeOceanCredentials:
         """
         if not os.path.exists(file_location):
             file_location = os.path.join(Path.home(), file_location)
-            os.makedirs(file_location)
+            os.makedirs(file_location, exist_ok=True)
 
         if not file_location:
             file_location = CREDENTIALS_FILEPATH
