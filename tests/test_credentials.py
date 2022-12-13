@@ -3,7 +3,7 @@ import os
 import unittest
 from pathlib import Path
 from unittest import mock
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 from aind_codeocean_api.credentials import CodeOceanCredentials
 
@@ -30,7 +30,7 @@ class TestCredentials(unittest.TestCase):
         token = "fake_token"
 
         with patch("fake_credentials.json", mock_open()) as mocked_file:
-            result = CodeOceanCredentials().create_credentials(
+            CodeOceanCredentials().create_credentials(
                 api_domain=domain,
                 access_token=token,
                 file_location=FAKE_PATH_USER_INPUT,
@@ -38,7 +38,10 @@ class TestCredentials(unittest.TestCase):
 
             mocked_file.assert_called_once_with(FAKE_PATH_USER_INPUT, "w")
 
-            mocked_file.write.assert_called_once_with({"domain":domain, "token":token})
+            mocked_file.write.assert_called_once_with(
+                {"domain": domain, "token": token}
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
