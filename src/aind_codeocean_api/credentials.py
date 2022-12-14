@@ -2,7 +2,6 @@
 import json
 import os
 from pathlib import Path
-from typing import Optional
 
 CREDENTIALS_FILENAME = "credentials.json"
 CREDENTIALS_DIR = ".codeocean"
@@ -89,8 +88,7 @@ if __name__ == "__main__":
     else:
         filepath = str(DEFAULT_HOME_PATH)
 
-    if not filepath:
-        os.makedirs(filepath, exists_ok = True, parents = True)
+    Path(filepath).parent.mkdir(exist_ok=True, parents=True)
 
     CodeOceanCredentials.create_credentials(
         api_domain=domain, access_token=token, file_location=filepath

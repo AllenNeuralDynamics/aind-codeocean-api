@@ -6,7 +6,6 @@ from unittest import mock
 from unittest.mock import patch
 
 from aind_codeocean_api.credentials import (
-    DEFAULT_HOME_PATH,
     CodeOceanCredentials,
 )
 
@@ -30,8 +29,9 @@ class TestCredentials(unittest.TestCase):
     @patch("json.load")
     @patch("os.path.exists")
     @patch("builtins.open", new_callable=unittest.mock.mock_open())
-    def test_credentials_2(self, m, m_path_exists, m_json):
-        """Tests credentials are loaded correctly."""
+    @mock.patch.dict(os.environ, {}, clear=True)
+    def test_credentials_path(self, m, m_path_exists, m_json):
+        """Tests credentials path."""
         m_path_exists.return_value = True
         m_json.return_value = {}
         co_creds = CodeOceanCredentials()
@@ -49,7 +49,7 @@ class TestCredentials(unittest.TestCase):
             file_location="mock_file.json",
         )
 
-        m.assert_called_once_with("mock_file.json", "w")
+        m.assert_called_once_with("mock_file.json", "w+")
         m_json.assert_called_with(
             {"domain": domain, "token": token},
             m.return_value.__enter__.return_value,
