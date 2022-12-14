@@ -3,9 +3,12 @@ import os
 import unittest
 from pathlib import Path
 from unittest import mock
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
-from aind_codeocean_api.credentials import CodeOceanCredentials
+from aind_codeocean_api.credentials import (
+    DEFAULT_HOME_PATH,
+    CodeOceanCredentials,
+)
 
 TEST_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 FAKE_CREDENTIALS_PATH = TEST_DIR / "resources" / "fake_credentials.json"
@@ -22,25 +25,36 @@ class TestCredentials(unittest.TestCase):
     def test_credentials(self):
         """Tests credentials are loaded correctly."""
         co_creds = CodeOceanCredentials()
-        self.assertEqual(str(FAKE_CREDENTIALS_PATH), co_creds.credentials_path)
         self.assertEqual({"token": "a_fake_token"}, co_creds.credentials)
 
-    def test_create_credentials(self):
+    @patch("json.load")
+    @patch("os.path.exists")
+    @patch("builtins.open", new_callable=unittest.mock.mock_open())
+    def test_credentials_2(self, m, m_path_exists, m_json):
+        """Tests credentials are loaded correctly."""
+        m_path_exists.return_value = True
+        m_json.return_value = {}
+        co_creds = CodeOceanCredentials()
+        m_json.assert_called_once_with(m.return_value.__enter__.return_value)
+
+    @patch("json.dump")
+    @patch("builtins.open", new_callable=unittest.mock.mock_open())
+    def test_create_credentials(self, m, m_json):
         domain = "https://acmecorp.codeocean.com"
         token = "fake_token"
 
-        with patch("fake_credentials.json", mock_open()) as mocked_file:
-            CodeOceanCredentials().create_credentials(
-                api_domain=domain,
-                access_token=token,
-                file_location=FAKE_PATH_USER_INPUT,
-            )
+        CodeOceanCredentials.create_credentials(
+            api_domain=domain,
+            access_token=token,
+            file_location="mock_file.json",
+        )
 
-            mocked_file.assert_called_once_with(FAKE_PATH_USER_INPUT, "w")
-
-            mocked_file.write.assert_called_once_with(
-                {"domain": domain, "token": token}
-            )
+        m.assert_called_once_with("mock_file.json", "w")
+        m_json.assert_called_with(
+            {"domain": domain, "token": token},
+            m.return_value.__enter__.return_value,
+            indent=4,
+        )
 
 
 if __name__ == "__main__":

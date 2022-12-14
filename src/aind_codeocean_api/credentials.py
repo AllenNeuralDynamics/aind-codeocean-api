@@ -6,11 +6,8 @@ from typing import Optional
 
 CREDENTIALS_FILENAME = "credentials.json"
 CREDENTIALS_DIR = ".codeocean"
-
-if os.environ.get("CODEOCEAN_CREDENTIALS_PATH"):
-    CREDENTIALS_FILEPATH = os.environ.get("CODEOCEAN_CREDENTIALS_PATH")
-else:
-    CREDENTIALS_FILEPATH = Path.home() / CREDENTIALS_DIR
+DEFAULT_ENV_VAR = "CODEOCEAN_CREDENTIALS_PATH"
+DEFAULT_HOME_PATH = Path.home() / CREDENTIALS_DIR / CREDENTIALS_FILENAME
 
 
 class CodeOceanCredentials:
@@ -36,14 +33,19 @@ class CodeOceanCredentials:
     def __init__(self):
         """Initializes credentials."""
 
-        self.credentials = self._load_json(CREDENTIALS_FILEPATH)
+        if os.environ.get(DEFAULT_ENV_VAR):
+            filepath = os.environ.get(DEFAULT_ENV_VAR)
+        else:
+            filepath = str(DEFAULT_HOME_PATH)
+
+        self.credentials = self._load_json(filepath)
 
     @staticmethod
     def create_credentials(
         api_domain: str,
         access_token: str,
-        file_location: Optional[str] = None,
-    ):
+        file_location: str,
+    ) -> None:
         """
         Takes in credential information from
         user input and create a credentials.json file.
@@ -54,29 +56,23 @@ class CodeOceanCredentials:
             API domain
         access_token : string
             API Access Token
-        file_location : Optional[str]
+        file_location : str
             File path where credentials.json file is written to
 
         Returns
         ---------------
-        credentials.json
+        None
+            Writes to file
         """
-        if not os.path.exists(file_location):
-            file_location = os.path.join(Path.home(), file_location)
-            os.makedirs(file_location, exist_ok=True)
 
-        if not file_location:
-            file_location = CREDENTIALS_FILEPATH
-
-        with open(
-            os.path.join(file_location, CREDENTIALS_FILENAME), "w"
-        ) as output:
+        with open(file_location, "w+") as output:
             json.dump(
                 {"domain": api_domain, "token": access_token}, output, indent=4
             )
 
 
-def main():
+if __name__ == "__main__":
+
     """Prompts user and calls create credentials method"""
 
     file_path = input(
@@ -86,10 +82,16 @@ def main():
     domain = input("Enter your domain: ")
     token = input("Enter your API Access Token: ")
 
+    if file_path:
+        filepath = file_path
+    elif os.environ.get(DEFAULT_ENV_VAR):
+        filepath = os.environ.get(DEFAULT_ENV_VAR)
+    else:
+        filepath = str(DEFAULT_HOME_PATH)
+
+    if not filepath:
+        os.makedirs(filepath, exists_ok = True, parents = True)
+
     CodeOceanCredentials.create_credentials(
-        api_domain=domain, access_token=token, file_location=file_path
+        api_domain=domain, access_token=token, file_location=filepath
     )
-
-
-if __name__ == "__main__":
-    main()
