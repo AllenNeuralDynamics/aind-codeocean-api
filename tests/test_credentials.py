@@ -20,7 +20,7 @@ class TestCredentials(unittest.TestCase):
         ({"CODEOCEAN_CREDENTIALS_PATH": str(FAKE_CREDENTIALS_PATH)}),
     )
     def test_credentials(self):
-        """Tests credentials are loaded correctly."""
+        """Tests credentials are loaded correctly from env var."""
         co_creds = CodeOceanCredentials()
         self.assertEqual({"token": "a_fake_token"}, co_creds.credentials)
 
@@ -29,14 +29,17 @@ class TestCredentials(unittest.TestCase):
     @patch("builtins.open", new_callable=unittest.mock.mock_open())
     @mock.patch.dict(os.environ, {}, clear=True)
     def test_credentials_path(self, m, m_path_exists, m_json):
-        """Tests credentials path."""
+        """Tests credentials are loaded from default path."""
         m_path_exists.return_value = True
         m_json.return_value = {}
+        co_creds = CodeOceanCredentials()
+        self.assertEqual(co_creds.credentials, {})
         m_json.assert_called_once_with(m.return_value.__enter__.return_value)
 
     @patch("json.dump")
     @patch("builtins.open", new_callable=unittest.mock.mock_open())
     def test_create_credentials(self, m, m_json):
+        """Tests create_credentials method."""
         domain = "https://acmecorp.codeocean.com"
         token = "fake_token"
 

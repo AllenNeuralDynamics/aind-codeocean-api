@@ -72,24 +72,22 @@ class CodeOceanCredentials:
 
 if __name__ == "__main__":
 
-    """Prompts user and calls create credentials method"""
+    # Prompt user
 
-    file_path = input(
-        """Enter a file path to which your credentials
-        will be saved. This defaults to `$HOME/.codeocean`:"""
-    )
-    domain = input("Enter your domain: ")
-    token = input("Enter your API Access Token: ")
+    user_input_file_path = input("""Save to (leave blank to use default):""")
+    domain = input("Domain: ")
+    token = input("Access Token: ")
 
-    if file_path:
-        filepath = file_path
+    # Use default file path if none entered
+    if user_input_file_path:
+        file_path = user_input_file_path
     elif os.environ.get(DEFAULT_ENV_VAR):
-        filepath = os.environ.get(DEFAULT_ENV_VAR)
+        file_path = os.environ.get(DEFAULT_ENV_VAR)
     else:
-        filepath = str(DEFAULT_HOME_PATH)
+        file_path = str(DEFAULT_HOME_PATH)
 
-    Path(filepath).parent.mkdir(exist_ok=True, parents=True)
+    Path(file_path).parent.mkdir(exist_ok=True, parents=True)
 
     CodeOceanCredentials.create_credentials(
-        api_domain=domain, access_token=token, file_location=filepath
+        api_domain=domain, access_token=token, file_location=file_path
     )
