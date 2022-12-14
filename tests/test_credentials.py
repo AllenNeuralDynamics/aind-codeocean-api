@@ -5,9 +5,7 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
 
-from aind_codeocean_api.credentials import (
-    CodeOceanCredentials,
-)
+from aind_codeocean_api.credentials import CodeOceanCredentials
 
 TEST_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 FAKE_CREDENTIALS_PATH = TEST_DIR / "resources" / "fake_credentials.json"
@@ -34,7 +32,6 @@ class TestCredentials(unittest.TestCase):
         """Tests credentials path."""
         m_path_exists.return_value = True
         m_json.return_value = {}
-        co_creds = CodeOceanCredentials()
         m_json.assert_called_once_with(m.return_value.__enter__.return_value)
 
     @patch("json.dump")
