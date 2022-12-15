@@ -34,6 +34,11 @@ response = co_client.get_data_asset(data_asset_id=data_asset_id)
 metadata = response.json()
 ```
 
+To store credentials locally, run:
+```
+python -m aind_codeocean_api.credentials
+```
+
 ## Contributing
 
 ### Linters and testing
