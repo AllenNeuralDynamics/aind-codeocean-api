@@ -74,8 +74,8 @@ if __name__ == "__main__":
 
     # Prompt user
 
-    user_input_file_path = input("""Save to (leave blank to use default):""")
-    domain = input("Domain: ")
+    user_input_file_path = input("""Save to (Leave blank to default to `$HOME/.codeocean`):""")
+    domain = input("Domain (e.g. https://acmecorp.codeocean.com): ")
     token = input("Access Token: ")
 
     # Use default file path if none entered
