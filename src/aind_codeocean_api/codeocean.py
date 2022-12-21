@@ -47,6 +47,62 @@ class CodeOceanClient:
         response = requests.get(url, auth=(self.token, ""))
         return response
 
+    def get_all_data_assets(
+        self,
+        start: int = 0,
+        limit: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        sort_field: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
+        favorite: Optional[bool] = None,
+        archived: Optional[bool] = None,
+        query: Optional[str] = None,
+    ) -> requests.models.Response:
+        """
+        This will return all data assets from a GET request to Code Ocean API.
+
+        Parameters
+        ---------------
+        start : Optional[int]
+            Describes the search from index.
+        limit : Optional[int]
+            Describes the upper limit to search.
+        sort_order : Optional[str]
+            Determines the result sort order.
+        sort_field : Optional[str]
+            Determines the field to sort by.
+        type : Optional[str]
+            Type of data asset: dataset or result.
+            Returns both if omitted.
+        ownership : Optional[str]
+            Search data asset by ownership: owner or shared.
+        favorite : Optional[bool]
+            Search only favorite data assets.
+        archived : Optional[bool]
+            Search only archived data assets.
+        query : Optional[str]
+            Determines the search query.
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+        start = 0
+        get_more = True
+
+        while get_more:
+
+            response = self.search_data_assets({"start": start})
+            get_response = response.json()
+
+            yield from get_response["results"]
+
+            if get_response["has_more"]:
+                start += len(get_response["results"])
+            else:
+                get_more = False
+
     def search_data_assets(
         self,
         start: Optional[int] = None,
@@ -60,7 +116,7 @@ class CodeOceanClient:
         query: Optional[str] = None,
     ) -> requests.models.Response:
         """
-        This will return data assets from a GET requets to Code Ocean API.
+        This will return data assets from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -413,3 +469,18 @@ class CodeOceanClient:
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
         return response
+
+def main():
+    from credentials import CodeOceanCredentials
+    code_ocean_client = CodeOceanCredentials()
+
+    co_api = CodeOceanClient(code_ocean_client.credentials["domain"], code_ocean_client.credentials["token"])
+    response = co_api.get_all_data_assets()
+
+    # TO-DO: move this into a separate function to write the file, write to JSON file
+    with open("all_data_assets.txt", "w") as f:
+        for x in response:
+            f.write(str(x))
+
+if __name__ == '__main__':
+    main()
