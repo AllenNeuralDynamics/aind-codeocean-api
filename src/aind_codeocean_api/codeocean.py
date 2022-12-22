@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional
 
 import requests
+import json
 
 
 class CodeOceanClient:
@@ -478,9 +479,9 @@ def main():
     response = co_api.get_all_data_assets()
 
     # TO-DO: move this into a separate function to write the file, write to JSON file
-    with open("all_data_assets.txt", "w") as f:
+    with open("response.json", "w") as f:
         for x in response:
-            f.write(str(x))
+            json.dump(x, f)
 
 if __name__ == '__main__':
     main()
