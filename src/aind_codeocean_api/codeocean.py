@@ -50,40 +50,18 @@ class CodeOceanClient:
 
     def get_all_data_assets(
         self,
-        start: int = 0,
-        limit: Optional[int] = None,
-        sort_order: Optional[str] = None,
-        sort_field: Optional[str] = None,
-        type: Optional[str] = None,
-        ownership: Optional[str] = None,
-        favorite: Optional[bool] = None,
-        archived: Optional[bool] = None,
-        query: Optional[str] = None,
+        batch_count = 100,
+        max_iterations: Optional[int] = None,
     ) -> requests.models.Response:
         """
         This will return all data assets from a GET request to Code Ocean API.
 
         Parameters
         ---------------
-        start : Optional[int]
-            Describes the search from index.
-        limit : Optional[int]
+        batch_count : 100
             Describes the upper limit to search.
-        sort_order : Optional[str]
-            Determines the result sort order.
-        sort_field : Optional[str]
-            Determines the field to sort by.
-        type : Optional[str]
-            Type of data asset: dataset or result.
-            Returns both if omitted.
-        ownership : Optional[str]
-            Search data asset by ownership: owner or shared.
-        favorite : Optional[bool]
-            Search only favorite data assets.
-        archived : Optional[bool]
-            Search only archived data assets.
-        query : Optional[str]
-            Determines the search query.
+        max_iterations : Optional[int]
+            Describes the max number of requests to make.
 
         Returns
         ---------------
@@ -91,18 +69,19 @@ class CodeOceanClient:
         """
         start = 0
         get_more = True
+        iterations = 0
 
-        while get_more:
+        while get_more and ((max_iterations is None) or (iterations < max_iterations)):
 
-            response = self.search_data_assets({"start": start})
+            response = self.search_data_assets(start=start, limit=batch_count)
             get_response = response.json()
+            start += batch_count
+            iterations += 1
+
+            get_more = get_response.get("has_more")
 
             yield from get_response["results"]
 
-            if get_response["has_more"]:
-                start += len(get_response["results"])
-            else:
-                get_more = False
 
     def search_data_assets(
         self,
@@ -478,10 +457,7 @@ def main():
     co_api = CodeOceanClient(code_ocean_client.credentials["domain"], code_ocean_client.credentials["token"])
     response = co_api.get_all_data_assets()
 
-    # TO-DO: move this into a separate function to write the file, write to JSON file
-    with open("response.json", "w") as f:
-        for x in response:
-            json.dump(x, f)
+    list_response = list(response)
 
 if __name__ == '__main__':
     main()
