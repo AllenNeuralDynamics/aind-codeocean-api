@@ -413,3 +413,32 @@ class CodeOceanClient:
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
         return response
+
+    def update_permissions(
+        self, capsule_id: str, permissions: Dict
+    ) -> requests.models.Response:
+        """
+        This will update permissions of a capsule from a PUT request to
+        Code Ocean API.
+
+        Parameters
+        ---------------
+        capsule_id : string
+            ID of the capsule
+        permissions : dict
+            Dictionary containing the following keys: 'users' and 'groups'.
+            'users' is a list of dictionaries containing the following
+            keys: 'id' which refers to the user id in Code Ocean and 'role'
+            which refers to the user's role in the capsule.
+            'groups' is a list of dictionaries containing the following
+            keys: 'id' which refers to the group id in Code Ocean and 'role'
+            which refers to the group's role in the capsule.
+        
+        Returns
+        ---------------
+        requests.models.Response
+        """
+            
+        url = f"{self.capsule_url}/{capsule_id}/permissions"
+        response = requests.put(url, json=permissions, auth=(self.token, ""))
+        return response
