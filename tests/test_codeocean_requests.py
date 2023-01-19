@@ -646,6 +646,37 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
 
+    @mock.patch("requests.post")
+    def test_update_permissions(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of updating permissions"""
+        input_json_data = {}
+        capsule_id = "648473aa-791e-4372-bd25-205cc587ec56"
+        permissions = {
+            "users": [
+                {"id": "user1", "role": "admin"},
+                {"id": "user2", "role": "viewer"}
+            ],
+            "groups": [
+                {"id": "group3", "role": "admin"},
+                {"id": "group4", "role": "viewer"}
+            ]
+        }
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
+            success_message = {}
+            return success_message
+
+        expected_status_code = 200
+
+        mock_response = self.mock_success_response(map_to_success_message, req_type="post")
+
+        mock_api_post.return_value = mock_response(json=input_json_data)
+
+        response = self.co_client.update_permissions(capsule_id, permissions)
+        self.assertEqual(response.status_code, expected_status_code)
 
 if __name__ == "__main__":
     unittest.main()
