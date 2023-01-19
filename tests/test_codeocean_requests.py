@@ -659,11 +659,12 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         
         permissions = {
             "users": [
-                {"id": "user2", "role": "viewer"}
+                {"email": "user2@email.com", "role": "viewer"}
             ],
             "groups": [
-                {"id": "group4", "role": "viewer"}
-            ]
+                {"group": "group4", "role": "viewer"}
+            ],
+            "everyone": "true"
         }
         example_capsule_id = "648473aa-791e-4372-bd25-205cc587ec56"
         input_json_data = {"capsule_id": example_capsule_id, "permissions": permissions}

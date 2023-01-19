@@ -426,13 +426,14 @@ class CodeOceanClient:
         capsule_id : string
             ID of the capsule
         permissions : dict
-            Dictionary containing the following keys: 'users' and 'groups'.
+            Dictionary containing the following keys: 'users', 'groups', and 'everyone'.
             'users' is a list of dictionaries containing the following
-            keys: 'id' which refers to the user id in Code Ocean and 'role'
+            keys: 'email' which refers to the user id in Code Ocean and 'role'
             which refers to the user's role in the capsule.
             'groups' is a list of dictionaries containing the following
-            keys: 'id' which refers to the group id in Code Ocean and 'role'
+            keys: 'group' which refers to the group id in Code Ocean and 'role'
             which refers to the group's role in the capsule.
+            'everyone' is a boolean value indicating whether the capsule is public
         
         Returns
         ---------------
