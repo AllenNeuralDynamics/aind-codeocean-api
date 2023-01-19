@@ -666,7 +666,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             ]
         }
         example_capsule_id = "648473aa-791e-4372-bd25-205cc587ec56"
-        input_json_data = {"capsule_id": example_capsule_id, "permissions": []}
+        input_json_data = {"capsule_id": example_capsule_id, "permissions": permissions}
 
         mocked_success_post = self.mock_success_response(
             map_to_success_message, req_type="post"
