@@ -439,7 +439,7 @@ class CodeOceanClient:
         ---------------
         requests.models.Response
         """
-            
+
         url = f"{self.capsule_url}/{capsule_id}/permissions"
-        response = requests.put(url, json=permissions, auth=(self.token, ""))
+        response = requests.post(url, json=permissions, auth=(self.token, ""))
         return response

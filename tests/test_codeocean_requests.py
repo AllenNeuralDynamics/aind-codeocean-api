@@ -652,6 +652,10 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
     ) -> None:
         """Tests the response of updating permissions"""
 
+        edge_domain = "https://acmecorp-edge.codeocean.com"
+        auth_token = "CODEOCEAN_API_TOKEN"
+        edge_co_client = CodeOceanClient(edge_domain, auth_token)
+
         def map_to_success_message(input_json: dict) -> dict:
             """Map to a success message"""
             success_message = {}
@@ -674,7 +678,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
-        response = self.co_client.update_permissions(
+        response = edge_co_client.update_permissions(
             capsule_id=example_capsule_id, permissions=permissions
         )
         self.assertEqual(response.status_code, 200)
