@@ -415,27 +415,26 @@ class CodeOceanClient:
         return response
 
     def update_permissions(
-        self, capsule_id: str, permissions: Dict
+        self, data_asset_id: str, users: List[Dict], groups: List[Dict], everyone: bool
     ) -> requests.models.Response:
         """
-        This will update permissions of a capsule from a PUT request to
+        This will update permissions of a data asset from a POST request to
         Code Ocean API.
 
         Parameters
         ---------------
-        capsule_id : string
-            ID of the capsule
-        permissions : dict
-            Dictionary containing: 'users', 'groups', and 'everyone'.
-            'users' is a list of dictionaries containing: 'email' and 'role'
-            'groups' is a list of dictionaries containing: 'group' and 'role'
-            'everyone' is a boolean value indicating whether the capsule is public
+        data_asset_id : string
+            ID of the data asset
+        users: list of dictionaries containing 'email' and 'role'
+        groups: list of dictionaries containing 'group' and 'role'
+        everyone: boolean value indicating whether the data asset is public
         
         Returns
         ---------------
         requests.models.Response
         """
 
-        url = f"{self.capsule_url}/{capsule_id}/permissions"
+        permissions = {"users": users, "groups": groups, "everyone": everyone}
+        url = f"{self.capsule_url}/{data_asset_id}/permissions"
         response = requests.post(url, json=permissions, auth=(self.token, ""))
         return response
