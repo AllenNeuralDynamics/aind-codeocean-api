@@ -425,9 +425,12 @@ class CodeOceanClient:
         ---------------
         data_asset_id : string
             ID of the data asset
-        users: list of dictionaries containing 'email' and 'role'
-        groups: list of dictionaries containing 'group' and 'role'
-        everyone: boolean value indicating whether the data asset is public
+        users: List[Dict]
+            list of dictionaries containing keys 'email' and 'role'
+        groups: List[Dict]
+            list of dictionaries containing keys 'group' and 'role'
+        everyone: bool
+            boolean value indicating whether the data asset is public
         
         Returns
         ---------------
