@@ -656,7 +656,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             """Map to a success message"""
             success_message = {}
             return success_message
-        
+
         users = [
                 {"email": "user2@email.com", "role": "viewer"}
             ],
@@ -664,9 +664,11 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                 {"group": "group4", "role": "viewer"}
             ],
         everyone = "true"
-        
+
         example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
-        input_json_data = {"data_asset_id": example_data_asset_id, "users": users, "groups": groups, "everyone": everyone}
+        input_json_data = {"data_asset_id": example_data_asset_id,
+                           "users": users, "groups": groups,
+                           "everyone": everyone}
 
         mocked_success_post = self.mock_success_response(
             map_to_success_message, req_type="post"
@@ -674,9 +676,11 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
         response = self.co_client.update_permissions(
-            data_asset_id=example_data_asset_id, users=users, groups=groups, everyone=everyone
+            data_asset_id=example_data_asset_id, users=users,
+            groups=groups, everyone=everyone
         )
         self.assertEqual(response.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
