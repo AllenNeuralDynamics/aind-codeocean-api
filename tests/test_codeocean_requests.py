@@ -651,12 +651,11 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self, mock_api_post: unittest.mock.MagicMock
     ) -> None:
         """Tests the response of updating permissions"""
-
-        def map_to_success_message(input_json: dict) -> dict:
-            """Map to a success message"""
-            success_message = {}
-            return success_message
-
+        
+        def request_post_response(json: dict) -> MockResponse:
+            """Mock a post response"""
+            return MockResponse(status_code=204, content=None)
+        
         users = [
                 {"email": "user2@email.com", "role": "viewer"}
             ],
@@ -670,16 +669,14 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                            "users": users, "groups": groups,
                            "everyone": everyone}
 
-        mocked_success_post = self.mock_success_response(
-            map_to_success_message, req_type="post"
-        )
+        mocked_success_post = request_post_response(json=input_json_data)
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
         response = self.co_client.update_permissions(
             data_asset_id=example_data_asset_id, users=users,
             groups=groups, everyone=everyone
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
 
 if __name__ == "__main__":
