@@ -416,8 +416,8 @@ class CodeOceanClient:
 
     def update_permissions(
         self, data_asset_id: str,
-        users: List[Dict],
-        groups: List[Dict],
+        users: List[Dict] = [],
+        groups: List[Dict] = [],
         everyone: bool = True
     ) -> requests.models.Response:
         """
@@ -428,12 +428,12 @@ class CodeOceanClient:
         ---------------
         data_asset_id : string
             ID of the data asset
-        users: List[Dict]
+        users: List[Dict] (optional, default [])
             list of dictionaries containing keys 'email' and 'role'
-        groups: List[Dict]
+        groups: List[Dict] (optional, default [])
             list of dictionaries containing keys 'group' and 'role'
           'role' is 'owner' or 'viewer'
-        everyone: bool (optional)
+        everyone: bool (optional, default True)
             boolean value indicating whether the data asset is public
 
         Returns

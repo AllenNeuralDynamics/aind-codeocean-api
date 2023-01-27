@@ -679,7 +679,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             data_asset_id=example_data_asset_id, users=users,
             groups=groups, everyone=everyone
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
 
 if __name__ == "__main__":
