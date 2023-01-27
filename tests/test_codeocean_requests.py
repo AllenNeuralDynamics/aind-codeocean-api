@@ -651,11 +651,13 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         self, mock_api_post: unittest.mock.MagicMock
     ) -> None:
         """Tests the response of updating permissions"""
-        
-        def request_post_response(json: dict) -> MockResponse:
-            """Mock a post response"""
-            return MockResponse(status_code=204, content=None)
-        
+
+        def mock_success_response() -> Callable[..., MockResponse]:
+            def request_post_response(json: dict) -> MockResponse:
+                """Mock a post response"""
+                return MockResponse(status_code=204, content=None)
+            return request_post_response
+
         users = [
                 {"email": "user2@email.com", "role": "viewer"}
             ],
@@ -669,7 +671,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                            "users": users, "groups": groups,
                            "everyone": everyone}
 
-        mocked_success_post = request_post_response(json=input_json_data)
+        mocked_success_post = mock_success_response()
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
         response = self.co_client.update_permissions(
