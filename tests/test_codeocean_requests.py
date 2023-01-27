@@ -97,7 +97,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                     "index_data": True,
                     "access_key_id": access_key_id,
                     "secret_access_key": secret_access_key,
-                },
+                }
             },
         }
 
@@ -640,11 +640,79 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         computation_id = "83dc2b36-b2e0-459c-8d9e-9381b000w00e0"
         response = self.co_client.register_result_as_data_asset(
-            computation_id=computation_id,
-            asset_name=asset_name,
+            computation_id=computation_id, asset_name=asset_name
         )
         self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
+
+    @mock.patch("requests.post")
+    def test_update_permissions(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of updating permissions"""
+
+        def mock_success_response() -> Callable[..., MockResponse]:
+            """Mock a successful response"""
+            def request_post_response(json: dict) -> MockResponse:
+                """Mock a post response"""
+                return MockResponse(status_code=204, content=None)
+
+            return request_post_response
+
+        users = ([{"email": "user2@email.com", "role": "viewer"}],)
+        groups = ([{"group": "group4", "role": "viewer"}],)
+        everyone = "true"
+
+        example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
+        input_json_data = {
+            "data_asset_id": example_data_asset_id,
+            "users": users,
+            "groups": groups,
+            "everyone": everyone,
+        }
+
+        mocked_success_post = mock_success_response()
+        mock_api_post.return_value = mocked_success_post(json=input_json_data)
+
+        response = self.co_client.update_permissions(
+            data_asset_id=example_data_asset_id,
+            users=users,
+            groups=groups,
+            everyone=everyone,
+        )
+        self.assertEqual(response.status_code, 204)
+
+    @mock.patch("requests.post")
+    def test_update_permissions_everyone_none(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of updating permissions"""
+
+        def mock_success_response() -> Callable[..., MockResponse]:
+            """Mock a success response"""
+            def request_post_response(json: dict) -> MockResponse:
+                """Mock a post response"""
+                return MockResponse(status_code=204, content=None)
+
+            return request_post_response
+
+        users = ([{"email": "user2@email.com", "role": "viewer"}],)
+        groups = ([{"group": "group4", "role": "viewer"}],)
+
+        example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
+        input_json_data = {
+            "data_asset_id": example_data_asset_id,
+            "users": users,
+            "groups": groups,
+        }
+
+        mocked_success_post = mock_success_response()
+        mock_api_post.return_value = mocked_success_post(json=input_json_data)
+
+        response = self.co_client.update_permissions(
+            data_asset_id=example_data_asset_id, users=users, groups=groups
+        )
+        self.assertEqual(response.status_code, 204)
 
 
 if __name__ == "__main__":

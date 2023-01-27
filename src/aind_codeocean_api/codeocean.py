@@ -157,7 +157,7 @@ class CodeOceanClient:
                     "prefix": prefix,
                     "keep_on_external_storage": keep_on_external_storage,
                     "index_data": index_data,
-                },
+                }
             },
         }
 
@@ -412,4 +412,44 @@ class CodeOceanClient:
         results_suffix = f"results/download_url?path={path_to_file}"
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
+        return response
+
+    def update_permissions(
+        self,
+        data_asset_id: str,
+        users: List[Dict] = [],
+        groups: List[Dict] = [],
+        everyone: bool = None,
+    ) -> requests.models.Response:
+        """
+        This will update permissions of a data asset from a POST request to
+        Code Ocean API.
+
+        Parameters
+        ---------------
+        data_asset_id : string
+            ID of the data asset
+        users: List[Dict] (optional, default [])
+            list of dictionaries containing keys 'email' and 'role'
+        groups: List[Dict] (optional, default [])
+            list of dictionaries containing keys 'group' and 'role'
+          'role' is 'owner' or 'viewer'
+        everyone: bool (optional, default True)
+            boolean value indicating whether the data asset is public
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+
+        if not everyone:
+            permissions = {"users": users, "groups": groups}
+        else:
+            permissions = {
+                "users": users,
+                "groups": groups,
+                "everyone": everyone,
+            }
+        url = f"{self.asset_url}/{data_asset_id}/permissions"
+        response = requests.post(url, json=permissions, auth=(self.token, ""))
         return response

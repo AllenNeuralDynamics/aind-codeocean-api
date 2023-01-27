@@ -41,9 +41,7 @@ class CodeOceanCredentials:
 
     @staticmethod
     def create_credentials(
-        api_domain: str,
-        access_token: str,
-        file_location: str,
+        api_domain: str, access_token: str, file_location: str
     ) -> None:
         """
         Takes in credential information from
