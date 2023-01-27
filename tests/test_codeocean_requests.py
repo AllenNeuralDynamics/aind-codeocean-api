@@ -652,6 +652,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         """Tests the response of updating permissions"""
 
         def mock_success_response() -> Callable[..., MockResponse]:
+            """Mock a successful response"""
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
                 return MockResponse(status_code=204, content=None)
