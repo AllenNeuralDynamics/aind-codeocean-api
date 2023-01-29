@@ -1,5 +1,6 @@
 """Module to interface with Code Ocean's backend.
 """
+import json
 from typing import Dict, List, Optional
 
 import requests
@@ -7,6 +8,8 @@ import requests
 
 class CodeOceanClient:
     """Client that will connect to Code Ocean"""
+
+    _MAX_SEARCH_BATCH_REQUEST = 1000
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
@@ -60,7 +63,7 @@ class CodeOceanClient:
         query: Optional[str] = None,
     ) -> requests.models.Response:
         """
-        This will return data assets from a GET requets to Code Ocean API.
+        This will return data assets from a GET request to Code Ocean API.
 
         Parameters
         ---------------
@@ -100,6 +103,83 @@ class CodeOceanClient:
         )
 
         return response
+
+    def search_all_data_assets(
+        self,
+        sort_order: Optional[str] = None,
+        sort_field: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
+        favorite: Optional[bool] = None,
+        archived: Optional[bool] = None,
+        query: Optional[str] = None,
+    ) -> requests.models.Response:
+        """
+        Utility method to return all of the search results that match a query
+        Parameters
+        ----------
+        sort_order : Optional[str]
+            Determines the result sort order.
+        sort_field : Optional[str]
+            Determines the field to sort by.
+        type : Optional[str]
+            Type of data asset: dataset or result.
+            Returns both if omitted.
+        ownership : Optional[str]
+            Search data asset by ownership: owner or shared.
+        favorite : Optional[bool]
+            Search only favorite data assets.
+        archived : Optional[bool]
+            Search only archived data assets.
+        query : Optional[str]
+            Determines the search query.
+
+        Returns
+        -------
+        requests.models.Response
+        """
+
+        # TODO: it'd be nice to re-use the search_data_assets function, but
+        #  it'll require passing in a requests.Session object into that method.
+        optional_params = locals()
+        query_params = {}
+
+        for param, val in optional_params.items():
+            if val is not None:
+                query_params[param] = val
+
+        start_index = 0
+        has_more_results = True
+        requests_session = requests.Session()
+        start_index = 0
+        limit = self._MAX_SEARCH_BATCH_REQUEST
+        all_results = []
+        with requests.Session() as requests_session:
+            has_more = True
+            status_code = 200
+            while has_more and status_code == 200:
+                query_params["start"] = start_index
+                query_params["limit"] = limit
+                response = requests_session.get(
+                    self.asset_url, params=query_params, auth=(self.token, "")
+                )
+                status_code = response.status_code
+                if status_code == 200:
+                    has_more = response.json()["has_more"]
+                    response_results = response.json()["results"]
+                    num_of_results = len(response_results)
+                    all_results.extend(response_results)
+                    has_more = has_more if num_of_results > 0 else False
+                    start_index += num_of_results
+                else:
+                    return response
+
+        all_response = requests.Response()
+        all_response.status_code = 200
+        all_response._content = json.dumps({"results": all_results}).encode(
+            "utf-8"
+        )
+        return all_response
 
     def register_data_asset(
         self,
