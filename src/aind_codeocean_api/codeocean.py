@@ -148,15 +148,13 @@ class CodeOceanClient:
             if val is not None:
                 query_params[param] = val
 
-        start_index = 0
-        has_more_results = True
         requests_session = requests.Session()
-        start_index = 0
-        limit = self._MAX_SEARCH_BATCH_REQUEST
         all_results = []
         with requests.Session() as requests_session:
             has_more = True
             status_code = 200
+            start_index = 0
+            limit = self._MAX_SEARCH_BATCH_REQUEST
             while has_more and status_code == 200:
                 query_params["start"] = start_index
                 query_params["limit"] = limit
