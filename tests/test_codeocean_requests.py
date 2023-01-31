@@ -1,7 +1,10 @@
 """Tests CodeOcean API python interface"""
+import json
 import unittest
 from typing import Any, Callable, List
 from unittest import mock
+
+import requests
 
 from aind_codeocean_api.codeocean import CodeOceanClient
 
@@ -255,6 +258,65 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         self.assertEqual(response.content, expected_response)
         self.assertEqual(response.status_code, 200)
+
+    @mock.patch("requests.Session.get")
+    def test_search_all_data_assets(
+        self, mock_api_get: unittest.mock.MagicMock
+    ) -> None:
+        """Tests search_all_data_assets method."""
+
+        mocked_response1 = requests.Response()
+        mocked_response1.status_code = 200
+        mocked_response1._content = json.dumps(
+            {
+                "has_more": True,
+                "results": [
+                    {"id": "abc123", "type": "dataset"},
+                    {"id": "def456", "type": "result"},
+                ],
+            }
+        ).encode("utf-8")
+
+        mocked_response2 = requests.Response()
+        mocked_response2.status_code = 200
+        mocked_response2._content = json.dumps(
+            {
+                "has_more": False,
+                "results": [
+                    {"id": "ghi789", "type": "result"},
+                    {"id": "jkl101", "type": "result"},
+                ],
+            }
+        ).encode("utf-8")
+
+        mock_api_get.side_effect = [mocked_response1, mocked_response2]
+        response = self.co_client.search_all_data_assets()
+
+        expected_response = {
+            "results": [
+                {"id": "abc123", "type": "dataset"},
+                {"id": "def456", "type": "result"},
+                {"id": "ghi789", "type": "result"},
+                {"id": "jkl101", "type": "result"},
+            ]
+        }
+
+        actual_response = response.json()
+
+        bad_response = requests.Response()
+        bad_response.status_code = 500
+        bad_response._content = json.dumps(
+            {"message": "Internal Server Error"}
+        ).encode("utf-8")
+        mock_api_get.side_effect = [bad_response]
+        expected_bad_response = {"message": "Internal Server Error"}
+        response_bad = self.co_client.search_all_data_assets(archived=False)
+        actual_bad_response = response_bad.json()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(expected_response, actual_response)
+        self.assertEqual(500, response_bad.status_code)
+        self.assertEqual(expected_bad_response, actual_bad_response)
 
     @mock.patch("requests.put")
     def test_update_data_asset(
@@ -653,6 +715,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def mock_success_response() -> Callable[..., MockResponse]:
             """Mock a successful response"""
+
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
                 return MockResponse(status_code=204, content=None)
@@ -690,6 +753,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def mock_success_response() -> Callable[..., MockResponse]:
             """Mock a success response"""
+
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
                 return MockResponse(status_code=204, content=None)
