@@ -115,7 +115,7 @@ class CodeOceanClient:
         query: Optional[str] = None,
     ) -> requests.models.Response:
         """
-        Utility method to return all of the search results that match a query
+        Utility method to return all the search results that match a query
         Parameters
         ----------
         sort_order : Optional[str]
