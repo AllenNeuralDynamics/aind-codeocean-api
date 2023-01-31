@@ -1,6 +1,6 @@
 """Tests CodeOcean API python interface"""
-import unittest
 import json
+import unittest
 from typing import Any, Callable, List
 from unittest import mock
 
@@ -268,39 +268,48 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         mocked_response1 = requests.Response()
         mocked_response1.status_code = 200
         mocked_response1._content = json.dumps(
-            {'has_more': True,
-             "results": [{"id": "abc123", "type": "dataset"},
-                         {"id": "def456", "type": "result"}]}
+            {
+                "has_more": True,
+                "results": [
+                    {"id": "abc123", "type": "dataset"},
+                    {"id": "def456", "type": "result"},
+                ],
+            }
         ).encode("utf-8")
 
         mocked_response2 = requests.Response()
         mocked_response2.status_code = 200
         mocked_response2._content = json.dumps(
-            {'has_more': False,
-             "results": [{"id": "ghi789", "type": "result"},
-                         {"id": "jkl101", "type": "result"}]}
+            {
+                "has_more": False,
+                "results": [
+                    {"id": "ghi789", "type": "result"},
+                    {"id": "jkl101", "type": "result"},
+                ],
+            }
         ).encode("utf-8")
 
         mock_api_get.side_effect = [mocked_response1, mocked_response2]
         response = self.co_client.search_all_data_assets()
 
-        expected_response = (
-            {"results": [{"id": "abc123", "type": "dataset"},
-                         {"id": "def456", "type": "result"},
-                         {"id": "ghi789", "type": "result"},
-                         {"id": "jkl101", "type": "result"}
-                         ]}
-        )
+        expected_response = {
+            "results": [
+                {"id": "abc123", "type": "dataset"},
+                {"id": "def456", "type": "result"},
+                {"id": "ghi789", "type": "result"},
+                {"id": "jkl101", "type": "result"},
+            ]
+        }
 
         actual_response = response.json()
 
         bad_response = requests.Response()
         bad_response.status_code = 500
         bad_response._content = json.dumps(
-            {'message': "Internal Server Error"}
+            {"message": "Internal Server Error"}
         ).encode("utf-8")
         mock_api_get.side_effect = [bad_response]
-        expected_bad_response = {'message': "Internal Server Error"}
+        expected_bad_response = {"message": "Internal Server Error"}
         response_bad = self.co_client.search_all_data_assets(archived=False)
         actual_bad_response = response_bad.json()
 
@@ -706,6 +715,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def mock_success_response() -> Callable[..., MockResponse]:
             """Mock a successful response"""
+
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
                 return MockResponse(status_code=204, content=None)
@@ -743,6 +753,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def mock_success_response() -> Callable[..., MockResponse]:
             """Mock a success response"""
+
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
                 return MockResponse(status_code=204, content=None)
