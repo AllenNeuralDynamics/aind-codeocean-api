@@ -409,7 +409,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             capsule_id=example_capsule_id, data_assets=[], parameters=["FOO"]
         )
         response2 = self.co_client.run_capsule(
-            capsule_id=example_capsule_id, data_assets=[], version="1"
+            capsule_id=example_capsule_id, data_assets=[], version=1
         )
         expected_response = {
             "created": 1646943238,

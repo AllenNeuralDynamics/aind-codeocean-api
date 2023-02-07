@@ -347,7 +347,7 @@ class CodeOceanClient:
         self,
         capsule_id: str,
         data_assets: List[Dict],
-        version: Optional[str] = None,
+        version: Optional[int] = None,
         parameters: Optional[List] = None,
     ) -> requests.models.Response:
         """
@@ -362,7 +362,7 @@ class CodeOceanClient:
             List of dictionaries containing the following keys: 'id' which
             refers to the data asset id in Code Ocean and 'mount' which
             refers to the data asset mount folder.
-        version : Optional[str]
+        version : Optional[int]
             Capsule version to be run. Defaults to None.
         parameters : List
             Parameters given to the capsule. Default None which means
