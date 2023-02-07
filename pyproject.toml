@@ -18,7 +18,8 @@ dynamic = ["version"]
 
 dependencies = [
     'requests',
-    'boto3'
+    'boto3',
+    'aws_secretsmanager_caching'
 ]
 
 [project.optional-dependencies]
