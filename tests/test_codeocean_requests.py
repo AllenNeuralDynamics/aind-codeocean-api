@@ -408,6 +408,9 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         response = self.co_client.run_capsule(
             capsule_id=example_capsule_id, data_assets=[], parameters=["FOO"]
         )
+        response2 = self.co_client.run_capsule(
+            capsule_id=example_capsule_id, data_assets=[], version=1
+        )
         expected_response = {
             "created": 1646943238,
             "has_results": False,
@@ -418,6 +421,8 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         }
         self.assertEqual(expected_response, response.content)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(expected_response, response2.content)
+        self.assertEqual(response2.status_code, 200)
 
     @mock.patch("requests.get")
     def test_get_capsule(self, mock_api_get: unittest.mock.MagicMock) -> None:
