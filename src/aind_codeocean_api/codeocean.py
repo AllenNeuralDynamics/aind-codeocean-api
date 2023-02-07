@@ -347,6 +347,7 @@ class CodeOceanClient:
         self,
         capsule_id: str,
         data_assets: List[Dict],
+        version: Optional[str] = None,
         parameters: Optional[List] = None,
     ) -> requests.models.Response:
         """
@@ -361,6 +362,8 @@ class CodeOceanClient:
             List of dictionaries containing the following keys: 'id' which
             refers to the data asset id in Code Ocean and 'mount' which
             refers to the data asset mount folder.
+        version : Optional[str]
+            Capsule version to be run. Defaults to None.
         parameters : List
             Parameters given to the capsule. Default None which means
             the capsule runs with no parameters.
@@ -382,6 +385,8 @@ class CodeOceanClient:
 
         if parameters:
             data["parameters"] = parameters
+        if version:
+            data["version"] = version
 
         response = requests.post(
             url=self.computation_url, json=data, auth=(self.token, "")
