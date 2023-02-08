@@ -1,19 +1,19 @@
 """Test credentials in AWS"""
+import json
 import os
 import sys
-import json
 import unittest
 from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
 
-from aws_secretsmanager_caching import SecretCache
 import boto3
 import botocore
+from aws_secretsmanager_caching import SecretCache
 from moto import mock_secretsmanager, mock_sts
 
-from aind_codeocean_api.credentials import CodeOceanCredentials
 from aind_codeocean_api import credentials_in_aws
+from aind_codeocean_api.credentials import CodeOceanCredentials
 
 TEST_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 FAKE_CREDENTIALS_PATH = TEST_DIR / "resources" / "fake_credentials.json"
@@ -54,7 +54,6 @@ class TestCredentialsInAWS(unittest.TestCase):
         # Create a mock for the _get_secret method that returns the fake credentials from a mocked secretsmanager
         with patch.object(credentials_in_aws, "_get_secret") as mock_get_secret:
             mock_get_secret.return_value = json.dumps({"domain": DOMAIN, "token": TOKEN})
-
             credentials_in_aws.create_credentials_from_aws_secrets_manager(
                 secret_name=SECRET_NAME,
                 file_location="mock_file.json"
@@ -74,7 +73,6 @@ class TestCredentialsInAWS(unittest.TestCase):
         # Create a mock for the _get_secret method that returns the fake credentials from a mocked secretsmanager
         with patch.object(credentials_in_aws, "_get_secret") as mock_get_secret:
             mock_get_secret.return_value = json.dumps({"domain": DOMAIN, "token": TOKEN})
-
             credentials_in_aws.create_credentials_from_aws_secrets_manager()
 
         m.assert_called_once_with(str(DEFAULT_HOME_PATH), "w+")
@@ -89,16 +87,13 @@ class TestCredentialsInAWS(unittest.TestCase):
     def test__get_secrets_cache_client(self):
         """Tests _get_secrets_cache_client method."""
         # Mock _get_credentials() method to return the fake credentials
-
         fake_assumed_role_object = boto3.client("sts").assume_role(
                     RoleArn=AWS_ROLE_ARN,
                     RoleSessionName="AssumeCodeoceanRoleSession",
                 )
-
         with patch.object(credentials_in_aws, "_get_credentials") as mock_get_credentials:
             mock_get_credentials.return_value = fake_assumed_role_object["Credentials"]  
             cache = credentials_in_aws._get_secrets_cache_client()
-
         self.assertIsInstance(cache, SecretCache)
 
     @mock_secretsmanager
@@ -108,5 +103,22 @@ class TestCredentialsInAWS(unittest.TestCase):
         credentials = credentials_in_aws._get_credentials()
         self.assertIsNotNone(credentials)
 
-    # test for error when credentials are not found
+    # test for ClientError when assuming role
+    def test__get_credentials_client_error(self):
+        """Tests _get_credentials method for ClientError."""
+        with patch.object(boto3.client("sts"), "assume_role") as mock_assume_role:
+            mock_assume_role.side_effect = botocore.exceptions.ClientError(
+                error_response={"Error": {"Code": "ClientError"}},
+                operation_name="assume_role",
+            )
+            with self.assertRaises(botocore.exceptions.ClientError):
+                credentials_in_aws._get_credentials()
+
+    # test for ClientError when getting secret
+    @mock_secretsmanager
+    @mock_sts
+    def test__get_secret_client_error(self):
+        """Tests _get_secret method for ClientError."""
+        with self.assertRaises(botocore.exceptions.ClientError):
+            credentials_in_aws._get_secret(secret_name="wrong")
     

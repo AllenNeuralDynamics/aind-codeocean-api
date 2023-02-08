@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 
 import boto3
-from botocore.exceptions import ClientError
 from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
+from botocore.exceptions import ClientError
 
 import aind_codeocean_api.credentials as co_credentials
 
@@ -35,6 +35,7 @@ def _get_secrets_cache_client(credentials: dict = None):
     )
     return cache
 
+
 def _get_credentials(aws_role_arn: str = AWS_ROLE_ARN):
     """
     Get credentials for the given AWS role.
@@ -53,6 +54,7 @@ def _get_credentials(aws_role_arn: str = AWS_ROLE_ARN):
         credentials=assumed_role_object['Credentials']
         return credentials
 
+
 def _get_secret(secret_name: str, credentials: dict = None) -> str:
     """Get secret from AWS Secrets Manager."""
     secret = None
@@ -63,10 +65,8 @@ def _get_secret(secret_name: str, credentials: dict = None) -> str:
             secret_id=secret_name
         )
     except ClientError as e:
-        if e.response["Error"]["Code"] == "ResourceNotFoundException":
-            print("Secret named '" + secret_name + "' not found")
-        else:
-            print("Error retrieving secret:", e)
+        print("Error retrieving secret:", e)
+        raise
     else:
         return secret
 
