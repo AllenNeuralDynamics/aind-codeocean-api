@@ -20,9 +20,9 @@ def _get_secrets_cache_client(credentials: dict = None):
     if credentials is None:
         credentials = _get_credentials()
     session = boto3.session.Session(
-        aws_access_key_id=credentials['AccessKeyId'],
-        aws_secret_access_key=credentials['SecretAccessKey'],
-        aws_session_token=credentials['SessionToken'],
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
     )
     client = session.client(
         service_name="secretsmanager",
@@ -30,8 +30,8 @@ def _get_secrets_cache_client(credentials: dict = None):
     )
     cache_config = SecretCacheConfig()
     cache = SecretCache(
-        config = cache_config,
-        client = client,
+        config=cache_config,
+        client=client,
     )
     return cache
 
@@ -51,7 +51,7 @@ def _get_credentials(aws_role_arn: str = AWS_ROLE_ARN):
         print("Error assuming role:", e)
         raise
     else:
-        credentials=assumed_role_object['Credentials']
+        credentials = assumed_role_object["Credentials"]
         return credentials
 
 
@@ -61,9 +61,7 @@ def _get_secret(secret_name: str, credentials: dict = None) -> str:
     cache = _get_secrets_cache_client(credentials)
 
     try:
-        secret = cache.get_secret_string(
-            secret_id=secret_name
-        )
+        secret = cache.get_secret_string(secret_id=secret_name)
     except ClientError as e:
         print("Error retrieving secret:", e)
         raise
@@ -86,5 +84,5 @@ def create_credentials_from_aws_secrets_manager(
     co_credentials.CodeOceanCredentials.create_credentials(
         api_domain=secret_dict["domain"],
         access_token=secret_dict["token"],
-        file_location=file_location
+        file_location=file_location,
     )
