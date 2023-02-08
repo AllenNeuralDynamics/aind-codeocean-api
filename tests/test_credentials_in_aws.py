@@ -30,10 +30,19 @@ DEFAULT_HOME_PATH = Path.home() / CREDENTIALS_DIR / CREDENTIALS_FILENAME
 
 class MockSecretCache:
     """Mock of the boto3 secrets cache client."""
+
     def get_secret_string(*args, **kwargs):
         """Mock get_secret_string method."""
-        return json.dumps(
-            {"domain": "https://acmecorp.codeocean.com", "token": "fake_token"}
+        if "secret_id" in kwargs:
+            if kwargs["secret_id"] == SECRET_NAME:
+                return json.dumps({"domain": DOMAIN, "token": TOKEN})
+        MockSecretCache.raise_client_error()
+
+    def raise_client_error(*args, **kwargs):
+        """Mock raise_client_error method."""
+        raise botocore.exceptions.ClientError(
+            error_response={"Error": {"Code": "ResourceNotFoundException"}},
+            operation_name="GetSecretValue",
         )
 
 
@@ -123,22 +132,23 @@ class TestCredentialsInAWS(unittest.TestCase):
         self.assertIsNotNone(credentials)
 
     # test for ClientError when assuming role
+    @mock_secretsmanager
     def test__get_credentials_client_error(self):
         """Tests _get_credentials method for ClientError."""
         with patch.object(
             boto3.client("sts"), "assume_role"
-        ) as mock_assume_role:
-            mock_assume_role.side_effect = botocore.exceptions.ClientError(
-                error_response={"Error": {"Code": "ClientError"}},
-                operation_name="assume_role",
-            )
+        ) as mock_sts_client:
+            mock_sts_client.side_effect = MockSecretCache.raise_client_error
             with self.assertRaises(botocore.exceptions.ClientError):
                 credentials_in_aws._get_credentials()
 
     # test for ClientError when getting secret
-    @mock_secretsmanager
     @mock_sts
     def test__get_secret_client_error(self):
         """Tests _get_secret method for ClientError."""
-        with self.assertRaises(botocore.exceptions.ClientError):
-            credentials_in_aws._get_secret(secret_name="wrong")
+        with patch.object(
+            credentials_in_aws, "_get_secrets_cache_client"
+        ) as mock_get_secrets_cache_client:
+            mock_get_secrets_cache_client.return_value = MockSecretCache()
+            with self.assertRaises(botocore.exceptions.ClientError):
+                credentials_in_aws._get_secret(secret_name="wrong_secret_name")
