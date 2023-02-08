@@ -1,5 +1,4 @@
 """Create CodeOceanCredentials from AWS Secrets Manager."""
-import base64
 import json
 import os
 from pathlib import Path
@@ -60,26 +59,16 @@ def _get_secret(secret_name: str, credentials: dict = None) -> str:
     cache = _get_secrets_cache_client(credentials)
 
     try:
-        print("Retrieving secret '" + secret_name + "' from AWS Secrets Manager")
         secret = cache.get_secret_string(
             secret_id=secret_name
         )
     except ClientError as e:
-        if e.response["Error"]["Code"] == "DecryptionFailure":
-            print("Can't decrypt the secret text using the provided key:", e)
-        elif e.response["Error"]["Code"] == "InternalServiceError":
-            print("An error occurred on the server:", e)
-        elif e.response["Error"]["Code"] == "InvalidParameterException":
-            print("The request had invalid parameters:", e)
-        elif e.response["Error"]["Code"] == "InvalidRequestException":
-            print("The request was invalid due to:", e)
-        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
             print("Secret named '" + secret_name + "' not found")
+        else:
+            print("Error retrieving secret:", e)
     else:
-        print("Secret '" + secret_name + "' found")
-        print("Secret value: " + secret)
-    
-    return secret
+        return secret
 
 
 def create_credentials_from_aws_secrets_manager(
@@ -89,15 +78,13 @@ def create_credentials_from_aws_secrets_manager(
     """Create CodeOceanCredentials from AWS Secrets Manager."""
     if file_location is None:
         file_location = str(co_credentials.DEFAULT_HOME_PATH)
-    else:
-        file_location = os.path.join(file_location, co_credentials.CREDENTIALS_FILENAME)
 
     Path(file_location).parent.mkdir(exist_ok=True, parents=True)
 
     secret = _get_secret(secret_name)
     secret_dict = json.loads(secret)
     co_credentials.CodeOceanCredentials.create_credentials(
-        secret_dict["api_domain"],
-        secret_dict["access_token"],
-        file_location,
+        api_domain=secret_dict["domain"],
+        access_token=secret_dict["token"],
+        file_location=file_location
     )
