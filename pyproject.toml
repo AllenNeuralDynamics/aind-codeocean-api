@@ -31,7 +31,8 @@ dev = [
     'isort',
     'Sphinx',
     'pygit2',
-    'furo'
+    'furo',
+    'moto'
 ]
 
 [tool.setuptools.packages.find]
