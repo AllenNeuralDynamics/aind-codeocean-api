@@ -4,21 +4,22 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path Setup --------------------------------------------------------------
-import os
-import pathlib
-import sys
+from os.path import dirname, abspath
+from pathlib import Path
+from datetime import date
+from aind_codeocean_api import __version__ as package_version
 
-from pygit2 import Repository
+INSTITUTE_NAME = "Allen Institute for Neural Dynamics"
 
-sys.path.insert(0, os.path.abspath("../../src"))
+current_year = date.today().year
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-head = Repository(pathlib.Path.cwd())
 
-project = str(head).split("/")[-3]
-copyright = "2022, Allen Institute of Neural Dynamics"
-author = "Allen Institute of Neural Dynamics"
-release = "0.1"
+project = Path(dirname(dirname(dirname(abspath(__file__))))).name
+copyright = f"{current_year}, {INSTITUTE_NAME}"
+author = INSTITUTE_NAME
+release = package_version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -28,7 +28,6 @@ dev = [
     'interrogate',
     'isort',
     'Sphinx',
-    'pygit2',
     'furo'
 ]
 
@@ -64,7 +63,12 @@ omit = ["*__init__*"]
 source = ["aind_codeocean_api", "tests"]
 
 [tool.coverage.report]
-exclude_lines = ["if __name__ == .__main__.:"]
+exclude_lines = [
+    "if __name__ == .__main__.:",
+    "from",
+    "import",
+    "pragma: no cover"
+]
 fail_under = 100
 
 [tool.isort]
