@@ -69,7 +69,6 @@ class CodeOceanCredentials:
 
 
 if __name__ == "__main__":
-
     # Prompt user
     user_input_file_path = input(
         f"Save to (Leave blank to default to {DEFAULT_HOME_PATH}): "
