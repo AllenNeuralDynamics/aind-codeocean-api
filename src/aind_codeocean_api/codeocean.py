@@ -15,40 +15,40 @@ class CodeOceanClient:
     class _URLStrings(Enum):
         """Enum class for CodeOcean's url strings"""
 
-        DATA_ASSETS = "data_assets"
         CAPSULES = "capsules"
         COMPUTATIONS = "computations"
+        DATA_ASSETS = "data_assets"
         PERMISSIONS = "permissions"
         RESULTS = "results"
 
     class _Fields(Enum):
         """Enum class for CodeOcean's API fields"""
 
-        HAS_MORE = "has_more"
-        RESULTS = "results"
-        START = "start"
-        LIMIT = "limit"
-        DESCRIPTION = "description"
-        TAGS = "tags"
-        MOUNT = "mount"
-        PARAMETERS = "parameters"
-        VERSION = "version"
-        NAME = "name"
-        SOURCE = "source"
-        CAPSULE_ID = "capsule_id"
-        DATA_ASSETS = "data_assets"
+        ACCESS_KEY_ID = "access_key_id"
         AWS = "aws"
         BUCKET = "bucket"
-        PREFIX = "prefix"
-        KEEP_ON_EXTERNAL_STORAGE = "keep_on_external_storage"
-        INDEX_DATA = "index_data"
-        ACCESS_KEY_ID = "access_key_id"
-        SECRET_ACCESS_KEY = "secret_access_key"
+        CAPSULE_ID = "capsule_id"
         COMPUTATION = "computation"
-        ID = "id"
-        USERS = "users"
-        GROUPS = "groups"
+        DATA_ASSETS = "data_assets"
+        DESCRIPTION = "description"
         EVERYONE = "everyone"
+        GROUPS = "groups"
+        HAS_MORE = "has_more"
+        ID = "id"
+        INDEX_DATA = "index_data"
+        KEEP_ON_EXTERNAL_STORAGE = "keep_on_external_storage"
+        LIMIT = "limit"
+        MOUNT = "mount"
+        NAME = "name"
+        PARAMETERS = "parameters"
+        PREFIX = "prefix"
+        RESULTS = "results"
+        SECRET_ACCESS_KEY = "secret_access_key"
+        START = "start"
+        SOURCE = "source"
+        TAGS = "tags"
+        USERS = "users"
+        VERSION = "version"
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
@@ -65,12 +65,18 @@ class CodeOceanClient:
         self.domain = domain
         self.token = token
         self.api_version = api_version
-        self.asset_url = f"{self.domain}/api/v{self.api_version}/" \
-                         f"{self._URLStrings.DATA_ASSETS.value}"
-        self.capsule_url = f"{self.domain}/api/v{self.api_version}/" \
-                           f"{self._URLStrings.CAPSULES.value}"
-        self.computation_url = f"{self.domain}/api/v{self.api_version}/" \
-                               f"{self._URLStrings.COMPUTATIONS.value}"
+        self.asset_url = (
+            f"{self.domain}/api/v{self.api_version}/"
+            f"{self._URLStrings.DATA_ASSETS.value}"
+        )
+        self.capsule_url = (
+            f"{self.domain}/api/v{self.api_version}/"
+            f"{self._URLStrings.CAPSULES.value}"
+        )
+        self.computation_url = (
+            f"{self.domain}/api/v{self.api_version}/"
+            f"{self._URLStrings.COMPUTATIONS.value}"
+        )
 
     def get_data_asset(self, data_asset_id: str) -> requests.models.Response:
         """
@@ -275,8 +281,9 @@ class CodeOceanClient:
                 self._Fields.AWS.value: {
                     self._Fields.BUCKET.value: bucket,
                     self._Fields.PREFIX.value: prefix,
-                    self._Fields.KEEP_ON_EXTERNAL_STORAGE.value:
-                        keep_on_external_storage,
+                    self._Fields.KEEP_ON_EXTERNAL_STORAGE.value: (
+                        keep_on_external_storage
+                    ),
                     self._Fields.INDEX_DATA.value: index_data,
                 }
             },
@@ -482,8 +489,10 @@ class CodeOceanClient:
         ---------------
         requests.models.Response
         """
-        url = f"{self.capsule_url}/{capsule_id}/" \
-              f"{self._URLStrings.COMPUTATIONS.value}"
+        url = (
+            f"{self.capsule_url}/{capsule_id}/"
+            f"{self._URLStrings.COMPUTATIONS.value}"
+        )
         response = requests.get(url, auth=(self.token, ""))
         return response
 
@@ -522,8 +531,10 @@ class CodeOceanClient:
         requests.models.Response
         """
 
-        url = f"{self.computation_url}/{computation_id}/" \
-              f"{self._URLStrings.RESULTS.value}"
+        url = (
+            f"{self.computation_url}/{computation_id}/"
+            f"{self._URLStrings.RESULTS.value}"
+        )
         response = requests.post(url, auth=(self.token, ""))
         return response
 
@@ -591,7 +602,9 @@ class CodeOceanClient:
                 self._Fields.GROUPS.value: groups,
                 self._Fields.EVERYONE.value: everyone,
             }
-        url = f"{self.asset_url}/{data_asset_id}/" \
-              f"{self._URLStrings.PERMISSIONS.value}"
+        url = (
+            f"{self.asset_url}/{data_asset_id}/"
+            f"{self._URLStrings.PERMISSIONS.value}"
+        )
         response = requests.post(url, json=permissions, auth=(self.token, ""))
         return response
