@@ -1,13 +1,8 @@
 """Module to interface with Code Ocean's backend.
 """
-import inspect
 import json
-import logging
-import os
-import sys
-import time
 from enum import Enum
-from inspect import currentframe, signature
+from inspect import signature
 from typing import Dict, List, Optional
 
 import requests
