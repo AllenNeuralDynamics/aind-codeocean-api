@@ -3,6 +3,7 @@ import json
 import unittest
 from typing import Any, Callable, List
 from unittest import mock
+from unittest.mock import call
 
 import requests
 
@@ -229,7 +230,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         example_data_asset_id = "6260cf28-de91-4528-9286-9c09869e00ec"
-        example_query = "ecephys"
+        example_query = "tag:ecephys"
         example_favorite = True
         example_archived = True
 
@@ -256,6 +257,15 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             "type": "dataset",
         }
 
+        mock_api_get.assert_called_once_with(
+            "https://acmecorp.codeocean.com/api/v1/data_assets",
+            params={
+                "favorite": True,
+                "archived": True,
+                "query": "tag:ecephys",
+            },
+            auth=("CODEOCEAN_API_TOKEN", ""),
+        )
         self.assertEqual(response.content, expected_response)
         self.assertEqual(response.status_code, 200)
 
@@ -313,6 +323,25 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         response_bad = self.co_client.search_all_data_assets(archived=False)
         actual_bad_response = response_bad.json()
 
+        mock_api_get.assert_has_calls(
+            [
+                call(
+                    "https://acmecorp.codeocean.com/api/v1/data_assets",
+                    params={"start": 2, "limit": 1000},
+                    auth=("CODEOCEAN_API_TOKEN", ""),
+                ),
+                call(
+                    "https://acmecorp.codeocean.com/api/v1/data_assets",
+                    params={"start": 2, "limit": 1000},
+                    auth=("CODEOCEAN_API_TOKEN", ""),
+                ),
+                call(
+                    "https://acmecorp.codeocean.com/api/v1/data_assets",
+                    params={"archived": False, "start": 0, "limit": 1000},
+                    auth=("CODEOCEAN_API_TOKEN", ""),
+                ),
+            ]
+        )
         self.assertEqual(200, response.status_code)
         self.assertEqual(expected_response, actual_response)
         self.assertEqual(500, response_bad.status_code)

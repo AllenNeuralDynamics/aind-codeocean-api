@@ -1,7 +1,13 @@
 """Module to interface with Code Ocean's backend.
 """
+import inspect
 import json
+import logging
+import os
+import sys
+import time
 from enum import Enum
+from inspect import currentframe, signature
 from typing import Dict, List, Optional
 
 import requests
@@ -137,13 +143,16 @@ class CodeOceanClient:
         ---------------
         requests.models.Response
         """
-        optional_params = locals()
-        optional_params.pop('self')
-        query_params = {}
-
-        for param, val in optional_params.items():
-            if val is not None:
-                query_params[param] = val
+        frame_locals = locals()
+        query_params = dict(
+            [
+                (k, frame_locals[k])
+                for k, v in signature(
+                    self.search_data_assets
+                ).parameters.items()
+                if frame_locals[k] is not None
+            ]
+        )
 
         response = requests.get(
             self.asset_url, params=query_params, auth=(self.token, "")
@@ -188,12 +197,16 @@ class CodeOceanClient:
 
         # TODO: it'd be nice to re-use the search_data_assets function, but
         #  it'll require passing in a requests.Session object into that method.
-        optional_params = locals()
-        query_params = {}
-
-        for param, val in optional_params.items():
-            if val is not None:
-                query_params[param] = val
+        frame_locals = locals()
+        query_params = dict(
+            [
+                (k, frame_locals[k])
+                for k, v in signature(
+                    self.search_all_data_assets
+                ).parameters.items()
+                if frame_locals[k] is not None
+            ]
+        )
 
         requests_session = requests.Session()
         all_results = []
