@@ -56,17 +56,23 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         def request_post_response(json: dict) -> MockResponse:
             """Mock a post response"""
             success_message = map_input_to_success_message(json)
-            return MockResponse(status_code=200, content=success_message, url="")
+            return MockResponse(
+                status_code=200, content=success_message, url=""
+            )
 
         def request_get_response(url: str) -> MockResponse:
             """Mock a get response"""
             success_message = map_input_to_success_message(url)
-            return MockResponse(status_code=200, content=success_message, url=url)
+            return MockResponse(
+                status_code=200, content=success_message, url=url
+            )
 
         def request_put_response(url: str, json: dict) -> MockResponse:
             """Mock a put response"""
             success_message = map_input_to_success_message(url, json)
-            return MockResponse(status_code=200, content=success_message, url=url)
+            return MockResponse(
+                status_code=200, content=success_message, url=url
+            )
 
         # TODO: Change these to enums
         if req_type == "post":
