@@ -66,7 +66,7 @@ class CodeOceanClient:
         self.domain = domain
         self.token = token
         self.api_version = api_version
-        self.logger = logging.getLogger('aind-codeocean-api')
+        self.logger = logging.getLogger("aind-codeocean-api")
         self.asset_url = (
             f"{self.domain}/api/v{self.api_version}/"
             f"{self._URLStrings.DATA_ASSETS.value}"
@@ -96,7 +96,7 @@ class CodeOceanClient:
 
         url = f"{self.asset_url}/{data_asset_id}"
         response = requests.get(url, auth=(self.token, ""))
-        
+
         self.logger.info(response.url)
 
         return response
