@@ -138,6 +138,7 @@ class CodeOceanClient:
         requests.models.Response
         """
         optional_params = locals()
+        optional_params.pop('self')
         query_params = {}
 
         for param, val in optional_params.items():
