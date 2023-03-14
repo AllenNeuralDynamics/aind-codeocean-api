@@ -30,6 +30,7 @@ class CodeOceanClient:
         BUCKET = "bucket"
         CAPSULE_ID = "capsule_id"
         COMPUTATION = "computation"
+        CUSTOM_METADATA = "custom_metadata"
         DATA_ASSETS = "data_assets"
         DESCRIPTION = "description"
         EVERYONE = "everyone"
@@ -248,6 +249,7 @@ class CodeOceanClient:
         asset_description: Optional[str] = "",
         keep_on_external_storage: Optional[bool] = True,
         index_data: Optional[bool] = True,
+        custom_metadata: Optional[dict] = None
     ) -> requests.models.Response:
         """
         Parameters
@@ -275,6 +277,8 @@ class CodeOceanClient:
             Keep data asset on external storage. Defaults to True.
         index_data : Optional[bool]
             Whether to index the data asset. Defaults to True.
+        custom_metadata : Optional[dict]
+            What key:value metadata tags to apply to the asset.
         Returns
         ---------------
         requests.models.Response
@@ -296,6 +300,7 @@ class CodeOceanClient:
                     self._Fields.INDEX_DATA.value: index_data,
                 }
             },
+            self._FIELDS.CUSTOM_METADATA.value: custom_metadata
         }
 
         if access_key_id and secret_access_key:
@@ -318,6 +323,8 @@ class CodeOceanClient:
         asset_description: Optional[str] = "",
         mount: Optional[str] = None,
         tags: Optional[List] = None,
+        custom_metadata: Optional[dict] = None,
+
     ) -> requests.models.Response:
         """
         Parameters
@@ -338,6 +345,8 @@ class CodeOceanClient:
             Keep data asset on external storage. Defaults to True.
         index_data : Optional[bool]
             Whether to index the data asset. Defaults to True.
+        custom_metadata : Optional[dict]
+            What key:value metadata tags to apply to the asset.
         Returns
         ---------------
         requests.models.Response
@@ -358,6 +367,7 @@ class CodeOceanClient:
                     self._Fields.ID.value: computation_id
                 }
             },
+            self._Fields.CUSTOM_METADATA.value: custom_metadata
         }
 
         response = requests.post(
@@ -373,6 +383,7 @@ class CodeOceanClient:
         new_description: Optional[str] = None,
         new_tags: Optional[List[str]] = None,
         new_mount: Optional[str] = None,
+        custom_metadata: Optional[dict] = None
     ) -> requests.models.Response:
         """
         This will update a data asset from a PUT request to Code Ocean API.
@@ -405,6 +416,9 @@ class CodeOceanClient:
 
         if new_mount:
             data[self._Fields.MOUNT.value] = new_mount
+
+        if custom_metadata:
+            data[self._Fields.CUSTOM_METADATA.value] = custom_metadata
 
         response = requests.put(url, json=data, auth=(self.token, ""))
 
@@ -443,6 +457,9 @@ class CodeOceanClient:
             ]
             where position one refers to the parameter #1 ('input_folder'),
             parameter #2 ('output_folder'), and parameter #3 ('bucket_name')
+        custom_metadata : Optional[dict]
+            What key:value metadata tags to apply to the asset.
+
         Returns
         ---------------
         requests.models.Response
