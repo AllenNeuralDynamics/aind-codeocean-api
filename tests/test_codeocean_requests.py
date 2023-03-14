@@ -103,7 +103,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                     "secret_access_key": secret_access_key,
                 }
             },
-            "custom_metadata": None
+            "custom_metadata": None,
         }
 
         def map_to_success_message(input_json: dict) -> dict:
