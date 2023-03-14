@@ -376,7 +376,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             "name": "modified name",
             "description": "a new description",
             "tags": ["aaa", "bbb"],
-            "custom_metadata": None,
+            "custom_metadata": {"key": "value"},
             "mount": "newmount",
         }
         mocked_success_put = self.mock_success_response(
@@ -393,6 +393,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             new_description="a new description",
             new_tags=["aaa", "bbb"],
             new_mount="newmount",
+            new_custom_metadata={"key": "value"},
         )
 
         expected_response = {

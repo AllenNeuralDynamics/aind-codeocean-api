@@ -381,7 +381,7 @@ class CodeOceanClient:
         new_description: Optional[str] = None,
         new_tags: Optional[List[str]] = None,
         new_mount: Optional[str] = None,
-        custom_metadata: Optional[dict] = None,
+        new_custom_metadata: Optional[dict] = None,
     ) -> requests.models.Response:
         """
         This will update a data asset from a PUT request to Code Ocean API.
@@ -398,7 +398,7 @@ class CodeOceanClient:
             New tags of the data asset. Default None (not updated)
         new_mount : str
             New mount of the data asset. Default None (not updated)
-        custom_metadata : Optional[dict]
+        new_custom_metadata : Optional[dict]
             What key:value metadata tags to apply to the asset.
 
         Returns
@@ -418,8 +418,8 @@ class CodeOceanClient:
         if new_mount:
             data[self._Fields.MOUNT.value] = new_mount
 
-        if custom_metadata:
-            data[self._Fields.CUSTOM_METADATA.value] = custom_metadata
+        if new_custom_metadata:
+            data[self._Fields.CUSTOM_METADATA.value] = new_custom_metadata
 
         response = requests.put(url, json=data, auth=(self.token, ""))
 
