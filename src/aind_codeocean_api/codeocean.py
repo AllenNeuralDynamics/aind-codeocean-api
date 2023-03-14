@@ -340,7 +340,6 @@ class CodeOceanClient:
         tags : Optional[List[str]]
             A list of tags to attach to the data asset.
             Default None (empty list).
-
         keep_on_external_storage : Optional[bool]
             Keep data asset on external storage. Defaults to True.
         index_data : Optional[bool]
@@ -400,6 +399,9 @@ class CodeOceanClient:
             New tags of the data asset. Default None (not updated)
         new_mount : str
             New mount of the data asset. Default None (not updated)
+        custom_metadata : Optional[dict]
+            What key:value metadata tags to apply to the asset.
+
         Returns
         ---------------
         requests.models.Response
@@ -457,8 +459,6 @@ class CodeOceanClient:
             ]
             where position one refers to the parameter #1 ('input_folder'),
             parameter #2 ('output_folder'), and parameter #3 ('bucket_name')
-        custom_metadata : Optional[dict]
-            What key:value metadata tags to apply to the asset.
 
         Returns
         ---------------
