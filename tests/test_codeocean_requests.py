@@ -103,6 +103,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                     "secret_access_key": secret_access_key,
                 }
             },
+            "custom_metadata": None,
         }
 
         def map_to_success_message(input_json: dict) -> dict:
@@ -375,6 +376,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             "name": "modified name",
             "description": "a new description",
             "tags": ["aaa", "bbb"],
+            "custom_metadata": {"key": "value"},
             "mount": "newmount",
         }
         mocked_success_put = self.mock_success_response(
@@ -391,6 +393,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             new_description="a new description",
             new_tags=["aaa", "bbb"],
             new_mount="newmount",
+            new_custom_metadata={"key": "value"},
         )
 
         expected_response = {
@@ -695,6 +698,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             "description": "",
             "mount": mount,
             "tags": [],
+            "custom_metadata": None,
             "source": {
                 "computation": {"id": "44ec16c3-cb5a-4000-93d1-cba8be800c00"}
             },
