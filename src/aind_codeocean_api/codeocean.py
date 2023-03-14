@@ -300,7 +300,7 @@ class CodeOceanClient:
                     self._Fields.INDEX_DATA.value: index_data,
                 }
             },
-            self._FIELDS.CUSTOM_METADATA.value: custom_metadata
+            self._Fields.CUSTOM_METADATA.value: custom_metadata
         }
 
         if access_key_id and secret_access_key:
