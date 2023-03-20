@@ -1,6 +1,7 @@
 """Module to interface with Code Ocean's backend.
 """
 import json
+import logging
 from enum import Enum
 from inspect import signature
 from typing import Dict, List, Optional
@@ -67,6 +68,7 @@ class CodeOceanClient:
         self.domain = domain
         self.token = token
         self.api_version = api_version
+        self.logger = logging.getLogger("aind-codeocean-api")
         self.asset_url = (
             f"{self.domain}/api/v{self.api_version}/"
             f"{self._URLStrings.DATA_ASSETS.value}"
@@ -96,6 +98,9 @@ class CodeOceanClient:
 
         url = f"{self.asset_url}/{data_asset_id}"
         response = requests.get(url, auth=(self.token, ""))
+
+        self.logger.info(response.url)
+
         return response
 
     def search_data_assets(
@@ -153,6 +158,8 @@ class CodeOceanClient:
         response = requests.get(
             self.asset_url, params=query_params, auth=(self.token, "")
         )
+
+        self.logger.info(response.url)
 
         return response
 
@@ -217,6 +224,9 @@ class CodeOceanClient:
                 response = requests_session.get(
                     self.asset_url, params=query_params, auth=(self.token, "")
                 )
+
+                self.logger.info(response.url)
+
                 status_code = response.status_code
                 if status_code == 200:
                     has_more = response.json()[self._Fields.HAS_MORE.value]
@@ -496,6 +506,9 @@ class CodeOceanClient:
 
         url = f"{self.capsule_url}/{capsule_id}"
         response = requests.get(url, auth=(self.token, ""))
+
+        self.logger.info(response.url)
+
         return response
 
     def get_capsule_computations(
@@ -519,6 +532,9 @@ class CodeOceanClient:
             f"{self._URLStrings.COMPUTATIONS.value}"
         )
         response = requests.get(url, auth=(self.token, ""))
+
+        self.logger.info(response.url)
+
         return response
 
     def get_computation(self, computation_id: str) -> requests.models.Response:
@@ -586,6 +602,9 @@ class CodeOceanClient:
         results_suffix = f"results/download_url?path={path_to_file}"
         url = f"{self.computation_url}/{computation_id}/{results_suffix}"
         response = requests.get(url, auth=(self.token, ""))
+
+        self.logger.info(response.url)
+
         return response
 
     def update_permissions(
