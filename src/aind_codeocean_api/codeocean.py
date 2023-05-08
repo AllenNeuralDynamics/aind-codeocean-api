@@ -43,6 +43,7 @@ class CodeOceanClient:
         LIMIT = "limit"
         MOUNT = "mount"
         NAME = "name"
+        NONE = "none"
         PARAMETERS = "parameters"
         PREFIX = "prefix"
         RESULTS = "results"
@@ -52,6 +53,7 @@ class CodeOceanClient:
         TAGS = "tags"
         USERS = "users"
         VERSION = "version"
+        VIEWER = "viewer"
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
@@ -612,7 +614,7 @@ class CodeOceanClient:
         data_asset_id: str,
         users: List[Dict] = [],
         groups: List[Dict] = [],
-        everyone: bool = None,
+        everyone: Optional[str] = None,
     ) -> requests.models.Response:
         """
         This will update permissions of a data asset from a POST request to
@@ -627,25 +629,22 @@ class CodeOceanClient:
         groups: List[Dict] (optional, default [])
             list of dictionaries containing keys 'group' and 'role'
           'role' is 'owner' or 'viewer'
-        everyone: bool (optional, default True)
-            boolean value indicating whether the data asset is public
+        everyone: str (optional, default None)
+            'none': remove global permissions. 'viewer': give global viewer permissions. 
 
         Returns
         ---------------
         requests.models.Response
         """
 
-        if not everyone:
-            permissions = {
-                self._Fields.USERS.value: users,
-                self._Fields.GROUPS.value: groups,
-            }
-        else:
-            permissions = {
-                self._Fields.USERS.value: users,
-                self._Fields.GROUPS.value: groups,
-                self._Fields.EVERYONE.value: everyone,
-            }
+        permissions = {
+            self._Fields.USERS.value: users,
+            self._Fields.GROUPS.value: groups,
+        }
+        
+        if everyone is not None:
+            permissions[self._Fields.EVERYONE.value] = everyone
+            
         url = (
             f"{self.asset_url}/{data_asset_id}/"
             f"{self._URLStrings.PERMISSIONS.value}"
