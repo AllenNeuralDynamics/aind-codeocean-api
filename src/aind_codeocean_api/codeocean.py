@@ -628,7 +628,7 @@ class CodeOceanClient:
             list of dictionaries containing keys 'group' and 'role'
           'role' is 'owner' or 'viewer'
         everyone: str (optional, default None)
-            'none': remove global permissions. 'viewer': give global viewer permissions.
+            'none': revoke global perms. 'viewer': grant viewer globally
 
         Returns
         ---------------
