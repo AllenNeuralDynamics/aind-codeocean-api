@@ -42,8 +42,7 @@ class CodeOceanClient:
         KEEP_ON_EXTERNAL_STORAGE = "keep_on_external_storage"
         LIMIT = "limit"
         MOUNT = "mount"
-        NAME = "name"
-        NONE = "none"
+        NAME = "name"        
         PARAMETERS = "parameters"
         PREFIX = "prefix"
         RESULTS = "results"
@@ -52,8 +51,7 @@ class CodeOceanClient:
         SOURCE = "source"
         TAGS = "tags"
         USERS = "users"
-        VERSION = "version"
-        VIEWER = "viewer"
+        VERSION = "version"        
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
