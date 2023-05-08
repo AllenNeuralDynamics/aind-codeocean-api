@@ -42,7 +42,7 @@ class CodeOceanClient:
         KEEP_ON_EXTERNAL_STORAGE = "keep_on_external_storage"
         LIMIT = "limit"
         MOUNT = "mount"
-        NAME = "name"        
+        NAME = "name"
         PARAMETERS = "parameters"
         PREFIX = "prefix"
         RESULTS = "results"
@@ -51,7 +51,7 @@ class CodeOceanClient:
         SOURCE = "source"
         TAGS = "tags"
         USERS = "users"
-        VERSION = "version"        
+        VERSION = "version"
 
     def __init__(self, domain: str, token: str, api_version: int = 1) -> None:
         """
@@ -628,7 +628,7 @@ class CodeOceanClient:
             list of dictionaries containing keys 'group' and 'role'
           'role' is 'owner' or 'viewer'
         everyone: str (optional, default None)
-            'none': remove global permissions. 'viewer': give global viewer permissions. 
+            'none': remove global permissions. 'viewer': give global viewer permissions.
 
         Returns
         ---------------
@@ -639,10 +639,10 @@ class CodeOceanClient:
             self._Fields.USERS.value: users,
             self._Fields.GROUPS.value: groups,
         }
-        
+
         if everyone is not None:
             permissions[self._Fields.EVERYONE.value] = everyone
-            
+
         url = (
             f"{self.asset_url}/{data_asset_id}/"
             f"{self._URLStrings.PERMISSIONS.value}"
