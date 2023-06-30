@@ -333,6 +333,8 @@ class CodeOceanClient:
         asset_description: Optional[str] = "",
         mount: Optional[str] = None,
         tags: Optional[List] = None,
+        keep_on_external_storage: Optional[bool] = True,
+        index_data: Optional[bool] = True,
         custom_metadata: Optional[dict] = None,
     ) -> requests.models.Response:
         """
