@@ -612,8 +612,8 @@ class CodeOceanClient:
     def update_permissions(
         self,
         data_asset_id: str,
-        users: List[Dict] = [],
-        groups: List[Dict] = [],
+        users: List[Dict] = None,
+        groups: List[Dict] = None,
         everyone: Optional[str] = None,
     ) -> requests.models.Response:
         """
