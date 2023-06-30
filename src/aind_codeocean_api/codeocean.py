@@ -349,10 +349,6 @@ class CodeOceanClient:
         tags : Optional[List[str]]
             A list of tags to attach to the data asset.
             Default None (empty list).
-        keep_on_external_storage : Optional[bool]
-            Keep data asset on external storage. Defaults to True.
-        index_data : Optional[bool]
-            Whether to index the data asset. Defaults to True.
         custom_metadata : Optional[dict]
             What key:value metadata tags to apply to the asset.
         Returns
@@ -610,8 +606,8 @@ class CodeOceanClient:
     def update_permissions(
         self,
         data_asset_id: str,
-        users: List[Dict] = [],
-        groups: List[Dict] = [],
+        users: Optional[List[Dict]] = None,
+        groups: Optional[List[Dict]] = None,
         everyone: Optional[str] = None,
     ) -> requests.models.Response:
         """
@@ -622,9 +618,9 @@ class CodeOceanClient:
         ---------------
         data_asset_id : string
             ID of the data asset
-        users: List[Dict] (optional, default [])
+        users: Optional[List[Dict]] (optional, default None)
             list of dictionaries containing keys 'email' and 'role'
-        groups: List[Dict] (optional, default [])
+        groups: Optional[List[Dict]] (optional, default None)
             list of dictionaries containing keys 'group' and 'role'
           'role' is 'owner' or 'viewer'
         everyone: str (optional, default None)
@@ -634,6 +630,9 @@ class CodeOceanClient:
         ---------------
         requests.models.Response
         """
+
+        users = [] if users is None else users
+        groups = [] if groups is None else groups
 
         permissions = {
             self._Fields.USERS.value: users,
