@@ -17,7 +17,8 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-    'requests'
+    'requests',
+    'aind-data-access-api[secrets]'
 ]
 
 [project.optional-dependencies]

@@ -2,7 +2,6 @@
 import os
 import unittest
 from pathlib import Path
-from unittest import mock
 from unittest.mock import patch
 
 from aind_codeocean_api.credentials import CodeOceanCredentials
@@ -15,46 +14,43 @@ FAKE_PATH_USER_INPUT = TEST_DIR / "resources"
 class TestCredentials(unittest.TestCase):
     """Tests credentials class methods."""
 
-    @mock.patch.dict(
+    def test_basic_init(self):
+        """Tests that the credentials can be instantiated with class
+        constructor."""
+        creds = CodeOceanCredentials(
+            domain="http://acmecorp.com/", token="123-abc"
+        )
+
+        # Trailing slashes should be stripped
+        self.assertEqual("http://acmecorp.com", creds.domain)
+        self.assertEqual("123-abc", creds.token.get_secret_value())
+
+    @patch.dict(
         os.environ,
-        ({"CODEOCEAN_CREDENTIALS_PATH": str(FAKE_CREDENTIALS_PATH)}),
+        (
+            {
+                "CODEOCEAN_DOMAIN": "http://acmecorp-env.com",
+                "CODEOCEAN_TOKEN": "123-abc-e",
+            }
+        ),
+        clear=True,
     )
-    def test_credentials(self):
-        """Tests credentials are loaded correctly from env var."""
-        co_creds = CodeOceanCredentials()
-        self.assertEqual({"token": "a_fake_token"}, co_creds.credentials)
-
-    @patch("json.load")
-    @patch("os.path.exists")
-    @patch("builtins.open", new_callable=unittest.mock.mock_open())
-    @mock.patch.dict(os.environ, {}, clear=True)
-    def test_credentials_path(self, m, m_path_exists, m_json):
-        """Tests credentials are loaded from default path."""
-        m_path_exists.return_value = True
-        m_json.return_value = {}
-        co_creds = CodeOceanCredentials()
-        self.assertEqual(co_creds.credentials, {})
-        m_json.assert_called_once_with(m.return_value.__enter__.return_value)
-
-    @patch("json.dump")
-    @patch("builtins.open", new_callable=unittest.mock.mock_open())
-    def test_create_credentials(self, m, m_json):
-        """Tests create_credentials method."""
-        domain = "https://acmecorp.codeocean.com"
-        token = "fake_token"
-
-        CodeOceanCredentials.create_credentials(
-            api_domain=domain,
-            access_token=token,
-            file_location="mock_file.json",
+    def test_env_vars(self):
+        creds_from_env = CodeOceanCredentials()
+        creds_combo_1 = CodeOceanCredentials(domain="http://acmecorp.com/")
+        creds_combo_2 = CodeOceanCredentials(token="123-abc")
+        creds_combo_3 = CodeOceanCredentials(
+            domain="http://acmecorp.com/", token="123-abc"
         )
 
-        m.assert_called_once_with("mock_file.json", "w+")
-        m_json.assert_called_with(
-            {"domain": domain, "token": token},
-            m.return_value.__enter__.return_value,
-            indent=4,
-        )
+        self.assertEqual("http://acmecorp-env.com", creds_from_env.domain)
+        self.assertEqual("123-abc-e", creds_from_env.token.get_secret_value())
+        self.assertEqual("http://acmecorp.com", creds_combo_1.domain)
+        self.assertEqual("123-abc-e", creds_combo_1.token.get_secret_value())
+        self.assertEqual("http://acmecorp-env.com", creds_combo_2.domain)
+        self.assertEqual("123-abc", creds_combo_2.token.get_secret_value())
+        self.assertEqual("http://acmecorp.com", creds_combo_3.domain)
+        self.assertEqual("123-abc", creds_combo_3.token.get_secret_value())
 
 
 if __name__ == "__main__":
