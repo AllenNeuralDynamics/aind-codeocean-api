@@ -67,7 +67,7 @@ class CodeOceanClient:
         api_version : int
             Code Ocean API version
         """
-        self.domain = domain
+        self.domain = domain.strip("/")
         self.token = token
         self.api_version = api_version
         self.logger = logging.getLogger("aind-codeocean-api")
