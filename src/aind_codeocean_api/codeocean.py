@@ -8,6 +8,8 @@ from typing import Dict, List, Optional
 
 import requests
 
+from aind_codeocean_api.credentials import CodeOceanCredentials
+
 
 class CodeOceanClient:
     """Client that will connect to Code Ocean"""
@@ -69,18 +71,47 @@ class CodeOceanClient:
         self.token = token
         self.api_version = api_version
         self.logger = logging.getLogger("aind-codeocean-api")
-        self.asset_url = (
+
+    @property
+    def asset_url(self):
+        """Asset url property."""
+        return (
             f"{self.domain}/api/v{self.api_version}/"
             f"{self._URLStrings.DATA_ASSETS.value}"
         )
-        self.capsule_url = (
+
+    @property
+    def capsule_url(self):
+        """Capsule url property."""
+        return (
             f"{self.domain}/api/v{self.api_version}/"
             f"{self._URLStrings.CAPSULES.value}"
         )
-        self.computation_url = (
+
+    @property
+    def computation_url(self):
+        """Computation url property."""
+        return (
             f"{self.domain}/api/v{self.api_version}/"
             f"{self._URLStrings.COMPUTATIONS.value}"
         )
+
+    @classmethod
+    def from_credentials(
+        cls, credentials: CodeOceanCredentials, api_version: int = 1
+    ):
+        """
+        Create client using credentials object.
+        Parameters
+        ----------
+        credentials : CodeOceanCredentials
+        api_version :
+          Code Ocean API version
+
+        """
+        domain = credentials.domain
+        token = credentials.token.get_secret_value()
+        return cls(domain=domain, token=token, api_version=api_version)
 
     def get_data_asset(self, data_asset_id: str) -> requests.models.Response:
         """

@@ -14,6 +14,9 @@ from pydantic.env_settings import (
 
 
 class CodeOceanCredentials(BaseSettings):
+    """Class to define credentials needed for CodeOcean. Has an api to set
+    credentials through a class constructor, environment variables, a config
+    file, or to pull them from aws secrets manager."""
 
     aws_secrets_name: Optional[str] = Field(
         default=None,
@@ -43,10 +46,12 @@ class CodeOceanCredentials(BaseSettings):
 
     @classmethod
     def default_config_file_path(cls):
+        """Return the default config file path."""
         return cls.Config.secrets_dir
 
     @validator("domain", pre=True)
     def _strip_trailing_slash(cls, input_domain):
+        """Strips trailing slash from domain."""
         return input_domain.strip("/")
 
     class Config:
@@ -133,10 +138,10 @@ class CodeOceanCredentials(BaseSettings):
 
             # If user inputs aws_secrets_name, ignore all other settings
             if aws_secrets_name:
-                return cls.settings_from_aws(secrets_name=aws_secrets_name)
+                return (cls.settings_from_aws(secrets_name=aws_secrets_name),)
             # If a user defines a config_file, ignore all other settings
             elif config_file is not None:
-                return cls.settings_from_config_file(config_file)
+                return (cls.settings_from_config_file(config_file),)
             # If a user attempts to construct object using init args and env
             # vars, ignore looking for a default config file
             elif (domain or env_domain) and (token or env_token):
@@ -152,18 +157,19 @@ class CodeOceanCredentials(BaseSettings):
                     ),
                 )
 
-    def save_credentials_to_file(self):
+    def save_credentials_to_file(self, output_path: Optional[Path] = None):
         """Saves domain and token to the file defined in config_file field or
         the default_config_file_path if config_file is None."""
 
         # Use default path if config_file is None
-        output_path = (
-            self.default_config_file_path()
-            if self.config_file is None
-            else self.config_file
-        )
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "w+") as output:
+        if output_path is not None:
+            out_path = output_path
+        elif self.config_file is not None:
+            out_path = self.config_file
+        else:
+            out_path = self.default_config_file_path()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w+") as output:
             json.dump(
                 {
                     "domain": self.domain,
