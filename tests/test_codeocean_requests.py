@@ -8,6 +8,7 @@ from unittest.mock import call
 import requests
 
 from aind_codeocean_api.codeocean import CodeOceanClient
+from aind_codeocean_api.credentials import CodeOceanCredentials
 
 
 class MockResponse:
@@ -157,6 +158,14 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
         self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
+
+    def test_create_from_credentials(self):
+        """Tests that the client can be constructed from a
+        CodeOceanCredentials object"""
+        creds = CodeOceanCredentials(domain="some_domain", token="some_token")
+        client = CodeOceanClient.from_credentials(credentials=creds)
+        self.assertEqual("some_domain", client.domain)
+        self.assertEqual("some_token", client.token)
 
     @mock.patch("requests.get")
     def test_get_data_asset(
