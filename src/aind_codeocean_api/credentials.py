@@ -4,13 +4,29 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from aind_data_access_api.secrets import get_secret
+import boto3
 from pydantic import BaseSettings, Field, SecretStr, validator
 from pydantic.env_settings import (
     EnvSettingsSource,
     InitSettingsSource,
     SecretsSettingsSource,
 )
+
+
+# Small helper function to get an aws secret
+def get_secret(secret_name: str) -> dict:
+    """
+    Retrieves a secret from AWS Secrets Manager.
+
+    param secret_name: The name of the secret to retrieve.
+    """
+    # Create a Secrets Manager client
+    client = boto3.client("secretsmanager")
+    try:
+        response = client.get_secret_value(SecretId=secret_name)
+    finally:
+        client.close()
+    return json.loads(response["SecretString"])
 
 
 class CodeOceanCredentials(BaseSettings):
