@@ -204,8 +204,10 @@ if __name__ == "__main__":
     )
     domain = input("Domain (e.g. https://acmecorp.codeocean.com): ")
     token = input("API Token: ")
-    cocreds = CodeOceanCredentials(
-        domain=domain, token=token
+    cocreds = CodeOceanCredentials(domain=domain, token=token)
+    cocreds.config_file = (
+        user_input_file_path
+        if user_input_file_path
+        else CodeOceanCredentials.default_config_file_path()
     )
-    cocreds.config_file = user_input_file_path if user_input_file_path else CodeOceanCredentials.default_config_file_path()
     cocreds.save_credentials_to_file()
