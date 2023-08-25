@@ -3,10 +3,15 @@ import json
 import os
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, call, mock_open, patch, Mock
+from unittest.mock import MagicMock, Mock, call, mock_open, patch
+
 from botocore.exceptions import ClientError
 
-from aind_codeocean_api.credentials import CodeOceanCredentials, get_secret
+from aind_codeocean_api.credentials import (
+    CodeOceanCredentials,
+    create_config_file,
+    get_secret,
+)
 
 TEST_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 FAKE_CREDENTIALS_PATH = TEST_DIR / "resources" / "fake_credentials.json"
@@ -73,8 +78,8 @@ class TestCredentials(unittest.TestCase):
         )
         self.assertEqual("http://acmecorp-aws.com", creds_from_aws.domain)
         self.assertEqual("123-abc-a", creds_from_aws.token.get_secret_value())
-        self.assertEqual("http://acmecorp-aws.com", creds_from_aws2.domain)
-        self.assertEqual("123-abc-a", creds_from_aws2.token.get_secret_value())
+        self.assertEqual("a_url", creds_from_aws2.domain)
+        self.assertEqual("tkn", creds_from_aws2.token.get_secret_value())
 
     @patch.dict(os.environ, EXAMPLE_ENV_VARS, clear=True)
     @patch("aind_codeocean_api.credentials.get_secret")
@@ -108,8 +113,8 @@ class TestCredentials(unittest.TestCase):
         creds_from_file = CodeOceanCredentials(
             config_file="mocked_file", domain="some_url"
         )
-        # Assert the domain set in the file overrides the domain set in init
-        self.assertEqual("http://acmecorp-cfg.com", creds_from_file.domain)
+        # Assert init is set
+        self.assertEqual("some_url", creds_from_file.domain)
         self.assertEqual("123-abc-c", creds_from_file.token.get_secret_value())
         mock_file.assert_called_once_with("mocked_file", "r")
 
@@ -133,8 +138,6 @@ class TestCredentials(unittest.TestCase):
         err_message = (
             "ValidationError(model='CodeOceanCredentials', "
             "errors=["
-            "{'loc': ('domain',), 'msg': 'field required', 'type':"
-            " 'value_error.missing'}, "
             "{'loc': ('token',), 'msg': 'field required', 'type':"
             " 'value_error.missing'}])"
         )
@@ -159,21 +162,29 @@ class TestCredentials(unittest.TestCase):
         mock_file.assert_called_once_with(default_path, "r")
 
     @patch("builtins.open", new_callable=mock_open)
-    def test_save_to_file(self, mock_file: MagicMock):
+    @patch("pathlib.Path.mkdir")
+    def test_save_to_file(self, mock_mkdir: MagicMock, mock_file: MagicMock):
         """Test save to file method."""
         creds = CodeOceanCredentials(domain="domain", token="token")
         creds2 = CodeOceanCredentials(domain="domain", token="token")
-        creds2.config_file = Path("some_path")
+        creds2.config_file = TEST_DIR / "creds1.json"
         default_path = creds.default_config_file_path()
         creds.save_credentials_to_file()
-        creds.save_credentials_to_file(output_path=Path("a_path"))
+        creds.save_credentials_to_file(output_path=(TEST_DIR / "creds2.json"))
         creds2.save_credentials_to_file()
+        mock_mkdir.assert_has_calls(
+            [
+                call(parents=True, exist_ok=True),
+                call(parents=True, exist_ok=True),
+                call(parents=True, exist_ok=True),
+            ]
+        )
 
         mock_file.assert_has_calls(
             [
                 call(default_path, "w+"),
-                call(Path("a_path"), "w+"),
-                call(Path("some_path"), "w+"),
+                call((TEST_DIR / "creds1.json"), "w+"),
+                call(TEST_DIR / "creds2.json", "w+"),
             ],
             any_order=True,
         )
@@ -199,8 +210,7 @@ class TestCredentials(unittest.TestCase):
 
         # Assert that the client was called with the correct arguments
         mock_boto3_client.assert_called_with("secretsmanager")
-        mock_client.get_secret_value.assert_called_with(
-            SecretId=secret_name)
+        mock_client.get_secret_value.assert_called_with(SecretId=secret_name)
 
         # Assert that the secret value returned matches the expected value
         expected_value = {
@@ -228,6 +238,54 @@ class TestCredentials(unittest.TestCase):
         # Assert that ClientError is raised
         with self.assertRaises(ClientError):
             get_secret("my_secret")
+
+
+class TestConfigFileCreation(unittest.TestCase):
+    """Tests configuration file creation"""
+
+    @patch("builtins.input")
+    @patch("builtins.open", new_callable=mock_open)
+    @patch("pathlib.Path.mkdir")
+    def test_with_config_file(
+        self,
+        mock_mkdir: MagicMock,
+        mock_file: MagicMock,
+        mock_input: MagicMock,
+    ):
+        """Tests that a user-defined config file path will be used"""
+
+        mock_inputs = [
+            "some_output_path/my_configs.json",
+            "http://domain",
+            "abc-123",
+        ]
+        mock_input.side_effect = mock_inputs
+        create_config_file()
+        mock_input.assert_called()
+        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+        mock_file.assert_called_once_with(
+            Path("some_output_path/my_configs.json"), "w+"
+        )
+
+    @patch("builtins.input")
+    @patch("builtins.open", new_callable=mock_open)
+    @patch("pathlib.Path.mkdir")
+    def test_default_config_file(
+        self,
+        mock_mkdir: MagicMock,
+        mock_file: MagicMock,
+        mock_input: MagicMock,
+    ):
+        """Tests that a default config path will be used if input is blank"""
+
+        mock_inputs = ["", "http://domain", "abc-123"]
+        mock_input.side_effect = mock_inputs
+        create_config_file()
+        mock_input.assert_called()
+        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+        mock_file.assert_called_once_with(
+            CodeOceanCredentials.default_config_file_path(), "w+"
+        )
 
 
 if __name__ == "__main__":

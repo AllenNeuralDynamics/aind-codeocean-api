@@ -154,10 +154,16 @@ class CodeOceanCredentials(BaseSettings):
 
             # If user inputs aws_secrets_name, ignore all other settings
             if aws_secrets_name:
-                return (cls.settings_from_aws(secrets_name=aws_secrets_name),)
-            # If a user defines a config_file, ignore all other settings
+                return (
+                    init_settings,
+                    cls.settings_from_aws(secrets_name=aws_secrets_name),
+                )
+            # If a user defines a config_file, ignore non-init settings
             elif config_file is not None:
-                return (cls.settings_from_config_file(config_file),)
+                return (
+                    init_settings,
+                    cls.settings_from_config_file(config_file),
+                )
             # If a user attempts to construct object using init args and env
             # vars, ignore looking for a default config file
             elif (domain or env_domain) and (token or env_token):
@@ -196,18 +202,22 @@ class CodeOceanCredentials(BaseSettings):
             )
 
 
-if __name__ == "__main__":
+def create_config_file():
+    """Main method to create a config file from user inputs"""
     # Prompt user
-    user_input_file_path = input(
-        f"Save to (Leave blank to save to default location"
-        f" {CodeOceanCredentials.default_config_file_path()}): "
+    user_input_file_path = (
+        input(
+            f"Save to (Leave blank to save to default location"
+            f" {CodeOceanCredentials.default_config_file_path()}): "
+        )
+        or None
     )
     domain = input("Domain (e.g. https://acmecorp.codeocean.com): ")
     token = input("API Token: ")
-    cocreds = CodeOceanCredentials(domain=domain, token=token)
-    cocreds.config_file = (
-        user_input_file_path
-        if user_input_file_path
-        else CodeOceanCredentials.default_config_file_path()
-    )
-    cocreds.save_credentials_to_file()
+    CodeOceanCredentials(
+        domain=domain, token=token, config_file=user_input_file_path
+    ).save_credentials_to_file()
+
+
+if __name__ == "__main__":
+    create_config_file()
