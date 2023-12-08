@@ -4,11 +4,15 @@ import json
 import logging
 from enum import Enum
 from inspect import signature
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import requests
 
 from aind_codeocean_api.credentials import CodeOceanCredentials
+from aind_codeocean_api.models.computations_requests import RunCapsuleRequest
+from aind_codeocean_api.models.data_assets_requests import (
+    CreateDataAssetRequest,
+)
 
 
 class CodeOceanClient:
@@ -278,132 +282,28 @@ class CodeOceanClient:
         )
         return all_response
 
-    def register_data_asset(
-        self,
-        asset_name: str,
-        mount: str,
-        bucket: str,
-        prefix: str,
-        access_key_id: Optional[str] = None,
-        secret_access_key: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        asset_description: Optional[str] = "",
-        keep_on_external_storage: Optional[bool] = True,
-        index_data: Optional[bool] = True,
-        custom_metadata: Optional[dict] = None,
+    def create_data_asset(
+        self, request: Union[dict, CreateDataAssetRequest]
     ) -> requests.models.Response:
         """
+        Create a data asset. The request can either be a CreateDataAssetRequest
+        class or a dictionary with the same shape. It's possible to create a
+        data asset from: aws bucket/prefix, gcp bucket/prefix, computation id.
+        More details about the other parameters can be found in the
+        CreateDataAssetRequest documentation.
         Parameters
-        ---------------
-        asset_name : string
-            Name of the asset
-        mount : string
-            Mount point
-        bucket : string
-            Bucket name. Currently only aws buckets are allowed.
-        prefix : string
-            The object prefix in the bucket
-        access_key_id : Optional[str]
-            AWS access key. It's not necessary for public buckets.
-            Default None (not provided).
-        secret_access_key : Optional[str]
-            AWS secret access key. It's not necessary for public buckets.
-            Default None (not provided).
-        tags : Optional[List[str]]
-            A list of tags to attach to the data asset.
-            Default None (empty list).
-        asset_description : Optional[str]
-            A description of the data asset. Default blanks.
-        keep_on_external_storage : Optional[bool]
-            Keep data asset on external storage. Defaults to True.
-        index_data : Optional[bool]
-            Whether to index the data asset. Defaults to True.
-        custom_metadata : Optional[dict]
-            What key:value metadata tags to apply to the asset.
+        ----------
+        request : Union[dict, CreateDataAssetRequest]
+
         Returns
-        ---------------
+        -------
         requests.models.Response
+
         """
-
-        tags_to_attach = [] if tags is None else tags
-        json_data = {
-            self._Fields.NAME.value: asset_name,
-            self._Fields.DESCRIPTION.value: asset_description,
-            self._Fields.MOUNT.value: mount,
-            self._Fields.TAGS.value: tags_to_attach,
-            self._Fields.SOURCE.value: {
-                self._Fields.AWS.value: {
-                    self._Fields.BUCKET.value: bucket,
-                    self._Fields.PREFIX.value: prefix,
-                    self._Fields.KEEP_ON_EXTERNAL_STORAGE.value: (
-                        keep_on_external_storage
-                    ),
-                    self._Fields.INDEX_DATA.value: index_data,
-                }
-            },
-            self._Fields.CUSTOM_METADATA.value: custom_metadata,
-        }
-
-        if access_key_id and secret_access_key:
-            json_data[self._Fields.SOURCE.value][self._Fields.AWS.value][
-                self._Fields.ACCESS_KEY_ID.value
-            ] = access_key_id
-            json_data[self._Fields.SOURCE.value][self._Fields.AWS.value][
-                self._Fields.SECRET_ACCESS_KEY.value
-            ] = secret_access_key
-
-        response = requests.post(
-            self.asset_url, json=json_data, auth=(self.token, "")
-        )
-        return response
-
-    def register_result_as_data_asset(
-        self,
-        computation_id: str,
-        asset_name: str,
-        asset_description: Optional[str] = "",
-        mount: Optional[str] = None,
-        tags: Optional[List] = None,
-        custom_metadata: Optional[dict] = None,
-    ) -> requests.models.Response:
-        """
-        Parameters
-        ---------------
-        computation_id : string
-            Computation id
-        asset_name : string
-            Name of the data asset.
-        asset_description : Optional[str]
-            A description of the data asset. Default blanks.
-        mount : string
-            Mount point. Default None (Mount point equal to the asset name)
-        tags : Optional[List[str]]
-            A list of tags to attach to the data asset.
-            Default None (empty list).
-        custom_metadata : Optional[dict]
-            What key:value metadata tags to apply to the asset.
-        Returns
-        ---------------
-        requests.models.Response
-        """
-
-        tags_to_attach = [] if tags is None else tags
-
-        if mount is None:
-            mount = asset_name
-
-        json_data = {
-            self._Fields.NAME.value: asset_name,
-            self._Fields.DESCRIPTION.value: asset_description,
-            self._Fields.MOUNT.value: mount,
-            self._Fields.TAGS.value: tags_to_attach,
-            self._Fields.SOURCE.value: {
-                self._Fields.COMPUTATION.value: {
-                    self._Fields.ID.value: computation_id
-                }
-            },
-            self._Fields.CUSTOM_METADATA.value: custom_metadata,
-        }
+        if isinstance(request, dict):
+            json_data = request
+        else:
+            json_data = json.loads(request.json_string)
 
         response = requests.post(
             self.asset_url, json=json_data, auth=(self.token, "")
@@ -463,56 +363,30 @@ class CodeOceanClient:
         return response
 
     def run_capsule(
-        self,
-        capsule_id: str,
-        data_assets: List[Dict],
-        version: Optional[int] = None,
-        parameters: Optional[List] = None,
+        self, request: Union[dict, RunCapsuleRequest]
     ) -> requests.models.Response:
         """
-        This will run a capsule/pipeline using a POST request to Code Ocean
-        API.
-
+        Run a capsule or pipeline. The request can either be a
+        RunCapsuleRequest class or a dictionary with the same shape. More
+        details about the other parameters can be found in the
+        RunCapsuleRequest documentation.
         Parameters
-        ---------------
-        capsule_id : string
-            ID of the capsule
-        data_assets : List[dict]
-            List of dictionaries containing the following keys: 'id' which
-            refers to the data asset id in Code Ocean and 'mount' which
-            refers to the data asset mount folder.
-        version : Optional[int]
-            Capsule version to be run. Defaults to None.
-        parameters : List
-            Parameters given to the capsule. Default None which means
-            the capsule runs with no parameters.
-            The parameters should match in order to the parameters given in the
-            capsule, e.g.
-            'parameters': [
-            'input_folder',
-            'output_folder',
-            'bucket_name'
-            ]
-            where position one refers to the parameter #1 ('input_folder'),
-            parameter #2 ('output_folder'), and parameter #3 ('bucket_name')
+        ----------
+        request : Union[dict, RunCapsuleRequest]
 
         Returns
-        ---------------
+        -------
         requests.models.Response
+
         """
 
-        data = {
-            self._Fields.CAPSULE_ID.value: capsule_id,
-            self._Fields.DATA_ASSETS.value: data_assets,
-        }
-
-        if parameters:
-            data[self._Fields.PARAMETERS.value] = parameters
-        if version:
-            data[self._Fields.VERSION.value] = version
+        if isinstance(request, dict):
+            json_data = request
+        else:
+            json_data = json.loads(request.json_string)
 
         response = requests.post(
-            url=self.computation_url, json=data, auth=(self.token, "")
+            url=self.computation_url, json=json_data, auth=(self.token, "")
         )
 
         return response

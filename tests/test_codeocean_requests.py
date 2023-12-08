@@ -9,6 +9,15 @@ import requests
 
 from aind_codeocean_api.codeocean import CodeOceanClient
 from aind_codeocean_api.credentials import CodeOceanCredentials
+from aind_codeocean_api.models.computations_requests import (
+    ComputationDataAsset,
+    RunCapsuleRequest,
+)
+from aind_codeocean_api.models.data_assets_requests import (
+    CreateDataAssetRequest,
+    Source,
+    Sources,
+)
 
 
 class MockResponse:
@@ -84,8 +93,16 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         else:
             return request_put_response
 
+    def test_source_raise_exception(self):
+        """Tests and exception is raised if Source is missing fields"""
+        with self.assertRaises(Exception) as e:
+            Source()
+        self.assertEqual(
+            "Exception('At least one source is required')", repr(e.exception)
+        )
+
     @mock.patch("requests.post")
-    def test_register_data_asset(
+    def test_register_aws_data_asset(
         self, mock_api_post: unittest.mock.MagicMock
     ) -> None:
         """Tests the response of registering a data asset"""
@@ -93,32 +110,30 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         mount = "MOUNT_NAME"
         bucket = "BUCKET_NAME"
         prefix = "PREFIX_NAME"
-        access_key_id = "AWS_ACCESS_KEY"
-        secret_access_key = "AWS_SECRET_KEY"
+        tags = ["tag1", "tag2"]
+        custom_metadata = {"modality": "ecephys", "subject id": "567890"}
+        aws_source = Sources.AWS(
+            bucket=bucket,
+            prefix=prefix,
+            keep_on_external_storage=True,
+            public=True,
+        )
+        source = Source(aws=aws_source)
+        create_data_asset_request = CreateDataAssetRequest(
+            name=asset_name,
+            tags=tags,
+            mount=mount,
+            source=source,
+            custom_metadata=custom_metadata,
+        )
 
-        input_json_data = {
-            "name": asset_name,
-            "description": "",
-            "mount": mount,
-            "tags": [],
-            "source": {
-                "aws": {
-                    "bucket": bucket,
-                    "prefix": prefix,
-                    "keep_on_external_storage": True,
-                    "index_data": True,
-                    "access_key_id": access_key_id,
-                    "secret_access_key": secret_access_key,
-                }
-            },
-            "custom_metadata": None,
-        }
+        input_json_data = json.loads(create_data_asset_request.json_string)
 
         def map_to_success_message(input_json: dict) -> dict:
             """Map to a success message"""
             success_message = {
                 "created": 1641420832,
-                "description": input_json["description"],
+                "description": "",
                 "files": 0,
                 "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
                 "lastUsed": 0,
@@ -132,7 +147,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         expected_request_response = {
             "created": 1641420832,
-            "description": input_json_data["description"],
+            "description": "",
             "files": 0,
             "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
             "lastUsed": 0,
@@ -148,16 +163,159 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
         mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
-        response = self.co_client.register_data_asset(
-            asset_name=asset_name,
-            mount=mount,
-            bucket=bucket,
-            prefix=prefix,
-            access_key_id=access_key_id,
-            secret_access_key=secret_access_key,
-        )
+        # Input request as dict
+        response = self.co_client.create_data_asset(request=input_json_data)
         self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
+
+        # Input request as class
+        response2 = self.co_client.create_data_asset(
+            request=create_data_asset_request
+        )
+        self.assertEqual(response2.content, expected_request_response)
+        self.assertEqual(response2.status_code, 200)
+
+    @mock.patch("requests.post")
+    def test_register_gcp_data_asset(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of registering a data asset"""
+        asset_name = "ASSET_NAME"
+        mount = "MOUNT_NAME"
+        bucket = "BUCKET_NAME"
+        prefix = "PREFIX_NAME"
+        tags = ["tag1", "tag2"]
+        custom_metadata = {"modality": "ecephys", "subject id": "567890"}
+        gcp_source = Sources.GCP(
+            bucket=bucket,
+            prefix=prefix,
+            client_id="GCP_CLIENT_ID",
+            client_secret="GCP_SECRET",
+        )
+        source = Source(gcp=gcp_source)
+        create_data_asset_request = CreateDataAssetRequest(
+            name=asset_name,
+            tags=tags,
+            mount=mount,
+            source=source,
+            custom_metadata=custom_metadata,
+        )
+
+        input_json_data = json.loads(create_data_asset_request.json_string)
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
+            success_message = {
+                "created": 1641420832,
+                "description": "",
+                "files": 0,
+                "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
+                "lastUsed": 0,
+                "name": input_json["name"],
+                "sizeInBytes": 0,
+                "state": "DATA_ASSET_STATE_DRAFT",
+                "tags": input_json["tags"],
+                "type": "DATA_ASSET_TYPE_DATASET",
+            }
+            return success_message
+
+        expected_request_response = {
+            "created": 1641420832,
+            "description": "",
+            "files": 0,
+            "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
+            "lastUsed": 0,
+            "name": input_json_data["name"],
+            "sizeInBytes": 0,
+            "state": "DATA_ASSET_STATE_DRAFT",
+            "tags": input_json_data["tags"],
+            "type": "DATA_ASSET_TYPE_DATASET",
+        }
+
+        mocked_success_post = self.mock_success_response(
+            map_to_success_message, req_type="post"
+        )
+        mock_api_post.return_value = mocked_success_post(json=input_json_data)
+
+        # Input request as dict
+        response = self.co_client.create_data_asset(request=input_json_data)
+        self.assertEqual(response.content, expected_request_response)
+        self.assertEqual(response.status_code, 200)
+
+        # Input request as class
+        response2 = self.co_client.create_data_asset(
+            request=create_data_asset_request
+        )
+        self.assertEqual(response2.content, expected_request_response)
+        self.assertEqual(response2.status_code, 200)
+
+    @mock.patch("requests.post")
+    def test_register_computation_data_asset(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of registering a data asset"""
+        asset_name = "ASSET_NAME"
+        mount = "MOUNT_NAME"
+        computation_id = "12345-abcdef"
+        tags = ["tag1", "tag2"]
+        custom_metadata = {"modality": "ecephys", "subject id": "567890"}
+        computation_source = Sources.Computation(id=computation_id)
+        source = Source(computation=computation_source)
+        create_data_asset_request = CreateDataAssetRequest(
+            name=asset_name,
+            tags=tags,
+            mount=mount,
+            source=source,
+            custom_metadata=custom_metadata,
+        )
+
+        input_json_data = json.loads(create_data_asset_request.json_string)
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
+            success_message = {
+                "created": 1641420832,
+                "description": "",
+                "files": 0,
+                "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
+                "lastUsed": 0,
+                "name": input_json["name"],
+                "sizeInBytes": 0,
+                "state": "DATA_ASSET_STATE_DRAFT",
+                "tags": input_json["tags"],
+                "type": "DATA_ASSET_TYPE_DATASET",
+            }
+            return success_message
+
+        expected_request_response = {
+            "created": 1641420832,
+            "description": "",
+            "files": 0,
+            "id": "44ec16c3-cb5a-45f5-93d1-cba8be800c24",
+            "lastUsed": 0,
+            "name": input_json_data["name"],
+            "sizeInBytes": 0,
+            "state": "DATA_ASSET_STATE_DRAFT",
+            "tags": input_json_data["tags"],
+            "type": "DATA_ASSET_TYPE_DATASET",
+        }
+
+        mocked_success_post = self.mock_success_response(
+            map_to_success_message, req_type="post"
+        )
+        mock_api_post.return_value = mocked_success_post(json=input_json_data)
+
+        # Input request as dict
+        response = self.co_client.create_data_asset(request=input_json_data)
+        self.assertEqual(response.content, expected_request_response)
+        self.assertEqual(response.status_code, 200)
+
+        # Input request as class
+        response2 = self.co_client.create_data_asset(
+            request=create_data_asset_request
+        )
+        self.assertEqual(response2.content, expected_request_response)
+        self.assertEqual(response2.status_code, 200)
 
     def test_create_from_credentials(self):
         """Tests that the client can be constructed from a
@@ -430,47 +588,107 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
     @mock.patch("requests.post")
     def test_run_capsule(self, mock_api_post: unittest.mock.MagicMock) -> None:
-        """Tests run_capsule method."""
+        """Tests run_capsule with capsule id method."""
 
         def map_to_success_message(input_json: dict) -> dict:
             """Map to a success message"""
-
+            input_id = input_json.get("capsule_id")
             success_message = {
                 "created": 1646943238,
                 "has_results": False,
-                "id": input_json["capsule_id"],
+                "id": input_id,
                 "name": "Run 6943238",
                 "run_time": 1,
                 "state": "initializing",
             }
             return success_message
 
-        example_capsule_id = "648473aa-791e-4372-bd25-205cc587ec56"
-        input_json_data = {"capsule_id": example_capsule_id, "data_assets": []}
-
+        capsule_id = "xyz-890"
+        data_assets = [
+            ComputationDataAsset(id="12345-abcdef", mount="SOME_MOUNT")
+        ]
+        run_capsule_request = RunCapsuleRequest(
+            capsule_id=capsule_id, data_assets=data_assets
+        )
+        run_capsule_request_json = json.loads(run_capsule_request.json_string)
         mocked_success_post = self.mock_success_response(
             map_to_success_message, req_type="post"
         )
-        mock_api_post.return_value = mocked_success_post(json=input_json_data)
 
-        response = self.co_client.run_capsule(
-            capsule_id=example_capsule_id, data_assets=[], parameters=["FOO"]
+        mock_api_post.return_value = mocked_success_post(
+            json=run_capsule_request_json
         )
-        response2 = self.co_client.run_capsule(
-            capsule_id=example_capsule_id, data_assets=[], version=1
+
+        run_capsule_response1 = self.co_client.run_capsule(
+            request=run_capsule_request_json
         )
-        expected_response = {
+        run_capsule_response2 = self.co_client.run_capsule(
+            request=run_capsule_request
+        )
+        expected_capsule_response = {
             "created": 1646943238,
             "has_results": False,
-            "id": example_capsule_id,
+            "id": capsule_id,
             "name": "Run 6943238",
             "run_time": 1,
             "state": "initializing",
         }
-        self.assertEqual(expected_response, response.content)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(expected_response, response2.content)
-        self.assertEqual(response2.status_code, 200)
+        self.assertEqual(
+            expected_capsule_response, run_capsule_response1.content
+        )
+        self.assertEqual(run_capsule_response1.status_code, 200)
+        self.assertEqual(
+            expected_capsule_response, run_capsule_response2.content
+        )
+        self.assertEqual(run_capsule_response2.status_code, 200)
+
+    @mock.patch("requests.post")
+    def test_run_pipeline(
+        self, mock_api_post: unittest.mock.MagicMock
+    ) -> None:
+        """Tests run_capsule with pipeline id method."""
+
+        def map_to_success_message(input_json: dict) -> dict:
+            """Map to a success message"""
+            input_id = input_json.get("pipeline_id")
+            success_message = {
+                "created": 1646943238,
+                "has_results": False,
+                "id": input_id,
+                "name": "Run 6943238",
+                "run_time": 1,
+                "state": "initializing",
+            }
+            return success_message
+
+        pipeline_id = "p-54524-adfnjkdbf"
+        run_pipeline_request = RunCapsuleRequest(pipeline_id=pipeline_id)
+        run_pipeline_request_json = json.loads(
+            run_pipeline_request.json_string
+        )
+        mocked_success_post = self.mock_success_response(
+            map_to_success_message, req_type="post"
+        )
+
+        mock_api_post.return_value = mocked_success_post(
+            json=run_pipeline_request_json
+        )
+
+        run_pipeline_response1 = self.co_client.run_capsule(
+            request=run_pipeline_request_json
+        )
+        expected_pipeline_response = {
+            "created": 1646943238,
+            "has_results": False,
+            "id": pipeline_id,
+            "name": "Run 6943238",
+            "run_time": 1,
+            "state": "initializing",
+        }
+        self.assertEqual(
+            expected_pipeline_response, run_pipeline_response1.content
+        )
+        self.assertEqual(run_pipeline_response1.status_code, 200)
 
     @mock.patch("requests.get")
     def test_get_capsule(self, mock_api_get: unittest.mock.MagicMock) -> None:
@@ -699,66 +917,6 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         self.assertEqual(response.content, expected_response)
-        self.assertEqual(response.status_code, 200)
-
-    @mock.patch("requests.post")
-    def test_register_result_as_data_asset(
-        self, mock_api_post: unittest.mock.MagicMock
-    ) -> None:
-        """Tests the response of registering a result as data asset"""
-        asset_name = "ASSET_NAME"
-        mount = "MOUNT_NAME"
-
-        input_json_data = {
-            "name": asset_name,
-            "description": "",
-            "mount": mount,
-            "tags": [],
-            "custom_metadata": None,
-            "source": {
-                "computation": {"id": "44ec16c3-cb5a-4000-93d1-cba8be800c00"}
-            },
-        }
-
-        def map_to_success_message(input_json: dict) -> dict:
-            """Map to a success message"""
-            tags_to_attach = (
-                None if not len(input_json["tags"]) else input_json["tags"]
-            )
-
-            success_message = {
-                "created": 1668529000,
-                "description": "",
-                "id": "cefd51ae-35b1-45b9-b82b-2de14f000z000",
-                "last_used": 0,
-                "name": "",
-                "state": "draft",
-                "tags": tags_to_attach,
-                "type": "result",
-            }
-            return success_message
-
-        expected_request_response = {
-            "created": 1668529000,
-            "description": "",
-            "id": "cefd51ae-35b1-45b9-b82b-2de14f000z000",
-            "last_used": 0,
-            "name": "",
-            "state": "draft",
-            "tags": None,
-            "type": "result",
-        }
-
-        mocked_success_post = self.mock_success_response(
-            map_to_success_message, req_type="post"
-        )
-        mock_api_post.return_value = mocked_success_post(json=input_json_data)
-
-        computation_id = "83dc2b36-b2e0-459c-8d9e-9381b000w00e0"
-        response = self.co_client.register_result_as_data_asset(
-            computation_id=computation_id, asset_name=asset_name
-        )
-        self.assertEqual(response.content, expected_request_response)
         self.assertEqual(response.status_code, 200)
 
     @mock.patch("requests.post")
