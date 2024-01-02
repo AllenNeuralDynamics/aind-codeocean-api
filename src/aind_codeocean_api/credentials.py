@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import boto3
-from pydantic import BaseSettings, Field, SecretStr, validator
-from pydantic.env_settings import (
+from pydantic.v1 import BaseSettings, Field, SecretStr, validator
+from pydantic.v1.env_settings import (
     EnvSettingsSource,
     InitSettingsSource,
     SecretsSettingsSource,
