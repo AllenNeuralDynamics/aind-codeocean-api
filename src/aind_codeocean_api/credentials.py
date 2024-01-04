@@ -97,8 +97,15 @@ class JsonConfigSettingsSource(PydanticBaseSettingsSource, ABC):
         return value
 
     def __call__(self) -> Dict[str, Any]:
-        """This function needs to be implemented for every
-        PydanticBaseSettingsSource"""
+        """
+        Run this when this class is called. Required to be implemented.
+
+        Returns
+        -------
+        Dict[str, Any]
+          The fields for the settings defined as a dict object.
+
+        """
         d: Dict[str, Any] = {}
 
         for field_name, field in self.settings_cls.model_fields.items():
