@@ -192,7 +192,7 @@ class TestCredentials(unittest.TestCase):
         )
 
     @patch("boto3.client")
-    def test_get_secret_success(self, mock_boto3_client):
+    def test_get_secret_success(self, mock_boto3_client: MagicMock):
         """Tests that secret is retrieved as expected"""
         # Mock the Secrets Manager client and response
         mock_client = Mock()
@@ -224,7 +224,7 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(secret_value, expected_value)
 
     @patch("boto3.client")
-    def test_get_secret_permission_denied(self, mock_boto3_client):
+    def test_get_secret_permission_denied(self, mock_boto3_client: MagicMock):
         """Tests  secret retrieval fails with incorrect aws permissions"""
         mock_boto3_client.return_value.get_secret_value.side_effect = (
             ClientError(

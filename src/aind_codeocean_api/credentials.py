@@ -47,8 +47,23 @@ class JsonConfigSettingsSource(PydanticBaseSettingsSource, ABC):
     def get_field_value(
         self, field: FieldInfo, field_name: str
     ) -> Tuple[Any, str, bool]:
-        """This function needs to be implemented for every
-        PydanticBaseSettingsSource"""
+        """
+        Gets the value, the key for model creation, and a flag to determine
+        whether value is complex.
+        Parameters
+        ----------
+        field : FieldInfo
+          The field
+        field_name : str
+          The field name
+
+        Returns
+        -------
+        Tuple[Any, str, bool]
+          A tuple contains the key, value and a flag to determine whether
+          value is complex.
+
+        """
         file_content_json = self._json_contents
         field_value = file_content_json.get(field_name)
         return field_value, field_name, False
@@ -60,8 +75,25 @@ class JsonConfigSettingsSource(PydanticBaseSettingsSource, ABC):
         value: Any,
         value_is_complex: bool,
     ) -> Any:
-        """This function needs to be implemented for every
-        PydanticBaseSettingsSource"""
+        """
+        Prepares the value of a field.
+        Parameters
+        ----------
+        field_name : str
+          The field name
+        field : FieldInfo
+          The field
+        value : Any
+          The value of the field that has to be prepared
+        value_is_complex : bool
+          A flag to determine whether value is complex
+
+        Returns
+        -------
+        Any
+          The prepared value
+
+        """
         return value
 
     def __call__(self) -> Dict[str, Any]:
@@ -96,11 +128,20 @@ class AWSConfigSettingsSource(JsonConfigSettingsSource):
     """Class that parses from aws secrets manager."""
 
     @staticmethod
-    def _get_secret(secret_name: str) -> dict:
+    def _get_secret(secret_name: str) -> Dict[str, Any]:
         """
         Retrieves a secret from AWS Secrets Manager.
 
-        param secret_name: The name of the secret to retrieve.
+        Parameters
+        ----------
+        secret_name : str
+          Secret name as stored in Secrets Manager
+
+        Returns
+        -------
+        Dict[str, Any]
+          Contents of the secret
+
         """
         # Create a Secrets Manager client
         client = boto3.client("secretsmanager")
