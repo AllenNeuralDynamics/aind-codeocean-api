@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, Mock, call, mock_open, patch
 from botocore.exceptions import ClientError
 
 from aind_codeocean_api.credentials import (
+    AWSConfigSettingsSource,
     CodeOceanCredentials,
     create_config_file,
-    get_secret,
 )
 
 TEST_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -67,7 +67,9 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual("123-abc", creds_combo_3.token.get_secret_value())
 
     @patch.dict(os.environ, EXAMPLE_ENV_VARS, clear=True)
-    @patch("aind_codeocean_api.credentials.get_secret")
+    @patch(
+        "aind_codeocean_api.credentials.AWSConfigSettingsSource._get_secret"
+    )
     def test_from_aws(self, mock_get_secret: MagicMock):
         """Tests pulling credentials from aws secrets manager."""
 
@@ -82,7 +84,9 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual("tkn", creds_from_aws2.token.get_secret_value())
 
     @patch.dict(os.environ, EXAMPLE_ENV_VARS, clear=True)
-    @patch("aind_codeocean_api.credentials.get_secret")
+    @patch(
+        "aind_codeocean_api.credentials.AWSConfigSettingsSource._get_secret"
+    )
     def test_from_aws_error(self, mock_get_secret: MagicMock):
         """Tests situation where an error is raised when attempting to set
         credentials through aws_secrets_name."""
@@ -135,11 +139,9 @@ class TestCredentials(unittest.TestCase):
         # just raise an Exception instead of attempting to fallback
         with self.assertRaises(Exception) as e:
             CodeOceanCredentials(config_file="mocked_file", domain="some_url")
+
         err_message = (
-            "ValidationError(model='CodeOceanCredentials', "
-            "errors=["
-            "{'loc': ('token',), 'msg': 'field required', 'type':"
-            " 'value_error.missing'}])"
+            "FileNotFoundError('mocked_file is defined, but file not found.')"
         )
         self.assertEqual(err_message, repr(e.exception))
 
@@ -158,7 +160,7 @@ class TestCredentials(unittest.TestCase):
         # Assert the domain set in the file overrides the domain set in init
         self.assertEqual("http://acmecorp-cfg.com", creds_from_file.domain)
         self.assertEqual("123-abc-c", creds_from_file.token.get_secret_value())
-        default_path = creds_from_file.default_config_file_path()
+        default_path = creds_from_file.config_file
         mock_file.assert_called_once_with(default_path, "r")
 
     @patch("builtins.open", new_callable=mock_open)
@@ -168,10 +170,10 @@ class TestCredentials(unittest.TestCase):
         creds = CodeOceanCredentials(domain="domain", token="token")
         creds2 = CodeOceanCredentials(domain="domain", token="token")
         creds2.config_file = TEST_DIR / "creds1.json"
-        default_path = creds.default_config_file_path()
-        creds.save_credentials_to_file()
+        default_path = creds.config_file
+        creds.save_credentials_to_file(creds.config_file)
         creds.save_credentials_to_file(output_path=(TEST_DIR / "creds2.json"))
-        creds2.save_credentials_to_file()
+        creds2.save_credentials_to_file(creds2.config_file)
         mock_mkdir.assert_has_calls(
             [
                 call(parents=True, exist_ok=True),
@@ -190,7 +192,7 @@ class TestCredentials(unittest.TestCase):
         )
 
     @patch("boto3.client")
-    def test_get_secret_success(self, mock_boto3_client):
+    def test_get_secret_success(self, mock_boto3_client: MagicMock):
         """Tests that secret is retrieved as expected"""
         # Mock the Secrets Manager client and response
         mock_client = Mock()
@@ -206,7 +208,7 @@ class TestCredentials(unittest.TestCase):
 
         # Call the get_secret method with a mock secret name
         secret_name = "my_secret"
-        secret_value = get_secret(secret_name)
+        secret_value = AWSConfigSettingsSource._get_secret(secret_name)
 
         # Assert that the client was called with the correct arguments
         mock_boto3_client.assert_called_with("secretsmanager")
@@ -222,7 +224,7 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(secret_value, expected_value)
 
     @patch("boto3.client")
-    def test_get_secret_permission_denied(self, mock_boto3_client):
+    def test_get_secret_permission_denied(self, mock_boto3_client: MagicMock):
         """Tests  secret retrieval fails with incorrect aws permissions"""
         mock_boto3_client.return_value.get_secret_value.side_effect = (
             ClientError(
@@ -237,7 +239,7 @@ class TestCredentials(unittest.TestCase):
         )
         # Assert that ClientError is raised
         with self.assertRaises(ClientError):
-            get_secret("my_secret")
+            AWSConfigSettingsSource._get_secret("my_secret")
 
 
 class TestConfigFileCreation(unittest.TestCase):
@@ -284,7 +286,8 @@ class TestConfigFileCreation(unittest.TestCase):
         mock_input.assert_called()
         mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
         mock_file.assert_called_once_with(
-            CodeOceanCredentials.default_config_file_path(), "w+"
+            CodeOceanCredentials.model_fields["config_file"].default_factory(),
+            "w+",
         )
 
 
