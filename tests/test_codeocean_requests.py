@@ -990,6 +990,43 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 204)
 
+    @mock.patch("requests.put")
+    def test_update_data_asset_tag(
+        self, mock_api_put: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of updating tags"""
+
+        def mock_success_response() -> Callable[..., MockResponse]:
+            """Mock a successful response"""
+
+            def request_put_response(json: dict) -> MockResponse:
+                """Mock a put response"""
+                return MockResponse(status_code=204, content=None, url="")
+
+            return request_put_response
+
+        users = ([{"email": "user2@email.com", "role": "viewer"}],)
+        groups = ([{"group": "group4", "role": "viewer"}],)
+        everyone = "viewer"
+
+        example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
+        input_json_data = {
+            "data_asset_id": example_data_asset_id,
+            "users": users,
+            "groups": groups,
+            "everyone": everyone,
+        }
+
+        mocked_success_put = mock_success_response()
+        mock_api_put.return_value = mocked_success_put(json=input_json_data)
+
+        response = self.co_client.update_data_asset_tag(
+            data_asset_id=example_data_asset_id,
+            tags = ["test1", "test2"],
+            add_new = True
+        )
+        self.assertEqual(response.status_code, 204)
+
 
 if __name__ == "__main__":
     unittest.main()

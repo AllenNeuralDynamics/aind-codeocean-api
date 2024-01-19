@@ -29,6 +29,7 @@ class CodeOceanClient:
         PERMISSIONS = "permissions"
         RESULTS = "results"
 
+
     class _Fields(Enum):
         """Enum class for CodeOcean's API fields"""
 
@@ -552,4 +553,52 @@ class CodeOceanClient:
             f"{self._URLStrings.PERMISSIONS.value}"
         )
         response = requests.post(url, json=permissions, auth=(self.token, ""))
+        return response
+
+    def update_data_asset_tag(
+            self,
+            data_asset_id: str,
+            tags: list = [],
+            add_new: bool = False,
+            merge: bool = False,
+            replace: tuple = ()
+    ) -> requests.models.Response:
+        """
+        This will update a data asset's tag from a POST request to
+        Code Ocean API. Can add new tags, merge with existing tags or replace a tag.
+
+        Parameters
+        ---------------
+        data_asset_id : string
+            ID of the data asset
+        tags: list
+            list of tags to be added to the data asset
+        add_new: bool
+            add new tags to the data asset
+        merge: bool
+            merge new tags with existing tags
+        replace: tuple
+            replace index 1 of tuple with new tag, index 0 is the tag to be replaced
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+        
+        url = (
+            f"{self.asset_url}/{data_asset_id}"
+        )
+        re = self.get_data_asset(data_asset_id).json()
+        
+        if add_new:
+            re['tags'] = tags
+        if merge:
+            re['tags'] = [tag for tag in re['tags'] if tag not in tags] + tags
+        if replace:
+            re['tags'][re['tags'].index(replace[0])] = replace[1]
+            
+        json_data = {
+            "tags": re['tags']
+        }
+        response = requests.put(url, json=json_data, auth=(self.token, ""))
         return response
