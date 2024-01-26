@@ -6,6 +6,8 @@
 import os
 from datetime import datetime
 
+from dotenv import load_dotenv
+
 from aind_codeocean_api.codeocean import CodeOceanClient
 from aind_codeocean_api.models.computations_requests import (
     ComputationDataAsset,
@@ -17,14 +19,9 @@ from aind_codeocean_api.models.data_assets_requests import (
     Sources,
 )
 
-# Env vars to set prior to running this script
-# CODEOCEAN_TOKEN
-# CODEOCEAN_DOMAIN
-# TEST_CAPSULE_ID
-# TEST_DATA_ASSET_BUCKET_PRIVATE
-# TEST_DATA_ASSET_PREFIX_PRIVATE
-# TEST_DATA_ASSET_BUCKET_PUBLIC
-# TEST_DATA_ASSET_PREFIX_PUBLIC
+# Create a .env file in the integration directory using the .env.template
+
+load_dotenv()
 
 TOKEN = os.getenv("CODEOCEAN_TOKEN")
 DOMAIN = os.getenv("CODEOCEAN_DOMAIN")
