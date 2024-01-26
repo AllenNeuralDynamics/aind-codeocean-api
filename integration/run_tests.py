@@ -33,6 +33,7 @@ TEST_DATA_ASSET_PREFIX_PUBLIC = os.getenv("TEST_DATA_ASSET_PREFIX_PUBLIC")
 
 
 def _check_status_code(response, api_call: str, expected_status_code: int):
+    """Helper function to test whether the status code is 200 or 204"""
     if expected_status_code == 200 and response.status_code != 200:
         raise AssertionError(
             f"{api_call} failed!"
@@ -51,6 +52,7 @@ def _check_status_code(response, api_call: str, expected_status_code: int):
 
 
 def test_search_data_asset(co_client: CodeOceanClient):
+    """Tests the search_data_assets api call"""
     response = co_client.search_data_assets(limit=10)
     _check_status_code(
         response=response,
@@ -61,6 +63,7 @@ def test_search_data_asset(co_client: CodeOceanClient):
 
 
 def test_register_private_data_asset(co_client: CodeOceanClient):
+    """Tests the create_data_asset api call with a private asset"""
     utcnow_str = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%SZ")
     asset_name = (
         f"asset_generated_from_test_register_private_data_asset_{utcnow_str}"
@@ -92,6 +95,7 @@ def test_register_private_data_asset(co_client: CodeOceanClient):
 
 
 def test_register_public_data_asset(co_client: CodeOceanClient):
+    """Tests the create_data_asset api call with a public asset"""
     utcnow_str = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%SZ")
     asset_name = (
         f"asset_generated_from_test_register_public_data_asset_{utcnow_str}"
@@ -125,6 +129,7 @@ def test_register_public_data_asset(co_client: CodeOceanClient):
 def test_update_private_data_asset_permissions(
     co_client: CodeOceanClient, data_asset_id
 ):
+    """Tests the update_permissions api call in a private asset"""
     response = co_client.update_permissions(
         data_asset_id=data_asset_id, everyone="viewer"
     )
@@ -139,6 +144,7 @@ def test_update_private_data_asset_permissions(
 def test_update_public_data_asset_permissions(
     co_client: CodeOceanClient, data_asset_id
 ):
+    """Tests the update_permissions api call in a public asset"""
     response = co_client.update_permissions(
         data_asset_id=data_asset_id, everyone="viewer"
     )
@@ -151,6 +157,7 @@ def test_update_public_data_asset_permissions(
 
 
 def test_run_capsule(co_client: CodeOceanClient, data_asset_id, mount):
+    """Tests the run_capsule api call"""
     capsule_id = TEST_CAPSULE_ID
     data_assets = [ComputationDataAsset(id=data_asset_id, mount=mount)]
     run_capsule_request = RunCapsuleRequest(
@@ -164,6 +171,7 @@ def test_run_capsule(co_client: CodeOceanClient, data_asset_id, mount):
 
 
 def run_tests():
+    """Run all api call tests and print responses"""
     co_client = CodeOceanClient(domain=DOMAIN, token=TOKEN)
     search_data_asset_response = test_search_data_asset(co_client=co_client)
     print(search_data_asset_response.json())
