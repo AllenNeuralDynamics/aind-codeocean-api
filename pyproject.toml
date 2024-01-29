@@ -31,7 +31,8 @@ dev = [
     'interrogate',
     'isort',
     'Sphinx',
-    'furo'
+    'furo',
+    'python-dotenv'
 ]
 
 [tool.setuptools.packages.find]
