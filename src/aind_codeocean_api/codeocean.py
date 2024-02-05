@@ -1,5 +1,6 @@
 """Module to interface with Code Ocean's backend.
 """
+
 import json
 import logging
 from enum import Enum
@@ -23,6 +24,7 @@ class CodeOceanClient:
     class _URLStrings(Enum):
         """Enum class for CodeOcean's url strings"""
 
+        ARCHIVE = "archive"
         CAPSULES = "capsules"
         COMPUTATIONS = "computations"
         DATA_ASSETS = "data_assets"
@@ -552,4 +554,50 @@ class CodeOceanClient:
             f"{self._URLStrings.PERMISSIONS.value}"
         )
         response = requests.post(url, json=permissions, auth=(self.token, ""))
+        return response
+
+    def archive_data_asset(
+        self, data_asset_id: str, archive: bool = True
+    ) -> requests.models.Response:
+        """
+        This will archive or unarchive a data asset using a PATCH request to the Code Ocean API.
+
+        Parameters
+        ---------------
+        data_asset_id : string
+            ID of the data asset
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+
+        url = (
+            f"{self.asset_url}/{data_asset_id}/"
+            f"{self._URLStrings.ARCHIVE.value}"
+        )
+        response = requests.patch(
+            url, params={"archive": archive}, auth=(self.token, "")
+        )
+        return response
+
+    def delete_data_asset(
+        self, data_asset_id: str
+    ) -> requests.models.Response:
+        """
+        This will delete a data asset using a DELETE request to the Code Ocean API.
+
+        Parameters
+        ---------------
+        data_asset_id : string
+            ID of the data asset
+
+        Returns
+        ---------------
+        requests.models.Response
+        """
+
+        url = f"{self.asset_url}/{data_asset_id}"
+
+        response = requests.delete(url, auth=(self.token, ""))
         return response
