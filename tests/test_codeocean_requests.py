@@ -1,4 +1,5 @@
 """Tests CodeOcean API python interface"""
+
 import json
 import unittest
 from typing import Any, Callable, List
@@ -85,11 +86,29 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                 status_code=200, content=success_message, url=url
             )
 
+        def request_patch_response(url: str) -> MockResponse:
+            """Mock a patch response"""
+            success_message = map_input_to_success_message(url)
+            return MockResponse(
+                status_code=202, content=success_message, url=url
+            )
+
+        def request_delete_response(url: str) -> MockResponse:
+            """Mock a delete response"""
+            success_message = map_input_to_success_message(url)
+            return MockResponse(
+                status_code=204, content=success_message, url=url
+            )
+
         # TODO: Change these to enums
         if req_type == "post":
             return request_post_response
         elif req_type == "get":
             return request_get_response
+        elif req_type == "patch":
+            return request_patch_response
+        elif req_type == "delete":
+            return request_delete_response
         else:
             return request_put_response
 
@@ -988,6 +1007,61 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         response = self.co_client.update_permissions(
             data_asset_id=example_data_asset_id, users=users, groups=groups
         )
+        self.assertEqual(response.status_code, 204)
+
+    @mock.patch("requests.patch")
+    def test_archive_data_asset(
+        self, mock_api_patch: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of archiving a data asset"""
+
+        def map_to_success_message(_) -> dict:
+            """Map to a success message"""
+            return ""
+
+        mocked_success_patch = self.mock_success_response(
+            map_to_success_message, req_type="patch"
+        )
+
+        example_data_asset_id = "da8dd108-2a10-471d-82b9-1e671b107bf8"
+        expected_url = (
+            f"{self.co_client.asset_url}/"
+            "{example_data_asset_id}/archive?archive=True"
+        )
+
+        mock_api_patch.return_value = mocked_success_patch(url=expected_url)
+
+        response = self.co_client.archive_data_asset(
+            data_asset_id=example_data_asset_id, archive=True
+        )
+
+        self.assertEqual(response.url, expected_url)
+        self.assertEqual(response.status_code, 202)
+
+    @mock.patch("requests.delete")
+    def test_delete_data_asset(
+        self, mock_api_delete: unittest.mock.MagicMock
+    ) -> None:
+        """Tests the response of deleting a data asset"""
+
+        def map_to_success_message(_) -> dict:
+            """Map to a success message"""
+            return ""
+
+        mocked_success_delete = self.mock_success_response(
+            map_to_success_message, req_type="delete"
+        )
+
+        example_data_asset_id = "da8dd108-2a10-471d-82b9-1e671b107bf8"
+        expected_url = f"{self.co_client.asset_url}/{example_data_asset_id}"
+
+        mock_api_delete.return_value = mocked_success_delete(url=expected_url)
+
+        response = self.co_client.delete_data_asset(
+            data_asset_id=example_data_asset_id
+        )
+
+        self.assertEqual(response.url, expected_url)
         self.assertEqual(response.status_code, 204)
 
 

@@ -1,4 +1,5 @@
 """Tests credentials loader."""
+
 import json
 import os
 import unittest

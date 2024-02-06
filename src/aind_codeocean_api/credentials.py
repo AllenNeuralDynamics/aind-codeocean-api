@@ -1,4 +1,5 @@
 """Basic CodeOcean Credentials Handling."""
+
 import functools
 import json
 import os
