@@ -560,7 +560,8 @@ class CodeOceanClient:
         self, data_asset_id: str, archive: bool = True
     ) -> requests.models.Response:
         """
-        This will archive or unarchive a data asset using a PATCH request to the Code Ocean API.
+        This will archive or unarchive a data asset using a PATCH request to
+        the Code Ocean API.
 
         Parameters
         ---------------
@@ -585,7 +586,8 @@ class CodeOceanClient:
         self, data_asset_id: str
     ) -> requests.models.Response:
         """
-        This will delete a data asset using a DELETE request to the Code Ocean API.
+        This will delete a data asset using a DELETE request to the Code Ocean
+        API.
 
         Parameters
         ---------------

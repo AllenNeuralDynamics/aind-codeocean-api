@@ -1024,7 +1024,10 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         example_data_asset_id = "da8dd108-2a10-471d-82b9-1e671b107bf8"
-        expected_url = f"{self.co_client.asset_url}/{example_data_asset_id}/archive?archive=True"
+        expected_url = (
+            f"{self.co_client.asset_url}/"
+            "{example_data_asset_id}/archive?archive=True"
+        )
 
         mock_api_patch.return_value = mocked_success_patch(url=expected_url)
 
