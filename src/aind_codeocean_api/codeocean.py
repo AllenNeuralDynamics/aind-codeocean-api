@@ -5,6 +5,7 @@ import json
 import logging
 from enum import Enum
 from inspect import signature
+from time import sleep
 from typing import Dict, List, Optional, Union
 
 import requests
@@ -200,6 +201,113 @@ class CodeOceanClient:
 
         return response
 
+    def _paginate_data_assets(
+        self,
+        sort_order: Optional[str] = None,
+        sort_field: Optional[str] = None,
+        type: Optional[str] = None,
+        ownership: Optional[str] = None,
+        favorite: Optional[bool] = None,
+        archived: Optional[bool] = None,
+        query: Optional[str] = None,
+    ):
+        """
+        Utility method to paginate through search results returned by search
+        Parameters
+        ----------
+        sort_order : Optional[str]
+            Determines the result sort order.
+        sort_field : Optional[str]
+            Determines the field to sort by.
+        type : Optional[str]
+            Type of data asset: dataset or result.
+            Returns both if omitted.
+        ownership : Optional[str]
+            Search data asset by ownership: owner or shared.
+        favorite : Optional[bool]
+            Search only favorite data assets.
+        archived : Optional[bool]
+            Search only archived data assets.
+        query : Optional[str]
+            Determines the search query.
+
+        Returns
+        -------
+        Iterator[List[dict]]
+        """
+
+        frame_locals = locals()
+        query_params = dict(
+            [
+                (k, frame_locals[k])
+                for k, v in signature(
+                    self.search_all_data_assets
+                ).parameters.items()
+                if frame_locals[k] is not None
+            ]
+        )
+
+        def get_page(
+            r: requests.Session,
+            qp: dict,
+            max_retries: int = 3,
+        ) -> dict:
+            """
+            Get a single list of results back from Code Ocean. It will retry
+            a request up to the max amount of retries. It will wait
+            min(retry_count**2, 15) seconds.
+            Parameters
+            ----------
+            r : requests.Session
+            qp : dict
+              query parameters
+            max_retries : int
+              Max number of retries before raising an error
+
+            Returns
+            -------
+            dict
+              Response from Code Ocean
+            """
+            rsp = r.get(self.asset_url, params=qp, auth=(self.token, ""))
+            if rsp.status_code == 200:
+                return rsp.json()
+            else:
+                retry = 1
+                while retry <= max_retries and rsp.status_code != 200:
+                    logging.debug(
+                        f"Backing off and retrying: {retry}. "
+                        f"Reason: {rsp.status_code}"
+                    )
+                    sleep(min(retry**2, 15))
+                    retry += 1
+                    rsp = r.get(
+                        self.asset_url, params=qp, auth=(self.token, "")
+                    )
+                if rsp.status_code == 200:
+                    return rsp.json()
+                else:
+                    raise ConnectionError(
+                        f"There was an error getting data from Code Ocean: "
+                        f"{rsp.status_code}"
+                    )
+
+        with requests.Session() as requests_session:
+            has_more = True
+            status_code = 200
+            start_index = 0
+            limit = self._MAX_SEARCH_BATCH_REQUEST
+            while has_more:
+                query_params[self._Fields.START.value] = start_index
+                query_params[self._Fields.LIMIT.value] = limit
+                page = get_page(requests_session, query_params)
+                has_more = page.get(self._Fields.HAS_MORE.value)
+                results = page.get("results", [])
+                num_of_results = len(results)
+                has_more = has_more if num_of_results > 0 else False
+                start_index += num_of_results
+                yield results
+
     def search_all_data_assets(
         self,
         sort_order: Optional[str] = None,
@@ -237,45 +345,19 @@ class CodeOceanClient:
 
         # TODO: it'd be nice to re-use the search_data_assets function, but
         #  it'll require passing in a requests.Session object into that method.
-        frame_locals = locals()
-        query_params = dict(
-            [
-                (k, frame_locals[k])
-                for k, v in signature(
-                    self.search_all_data_assets
-                ).parameters.items()
-                if frame_locals[k] is not None
-            ]
-        )
 
-        requests_session = requests.Session()
         all_results = []
-        with requests.Session() as requests_session:
-            has_more = True
-            status_code = 200
-            start_index = 0
-            limit = self._MAX_SEARCH_BATCH_REQUEST
-            while has_more and status_code == 200:
-                query_params[self._Fields.START.value] = start_index
-                query_params[self._Fields.LIMIT.value] = limit
-                response = requests_session.get(
-                    self.asset_url, params=query_params, auth=(self.token, "")
-                )
 
-                self.logger.info(response.url)
-
-                status_code = response.status_code
-                if status_code == 200:
-                    has_more = response.json()[self._Fields.HAS_MORE.value]
-                    response_results = response.json()[
-                        self._Fields.RESULTS.value
-                    ]
-                    num_of_results = len(response_results)
-                    all_results.extend(response_results)
-                    has_more = has_more if num_of_results > 0 else False
-                    start_index += num_of_results
-                else:
-                    return response
+        for page in self._paginate_data_assets(
+            sort_order=sort_order,
+            sort_field=sort_field,
+            type=type,
+            ownership=ownership,
+            favorite=favorite,
+            archived=archived,
+            query=query,
+        ):
+            all_results.extend(list(page))
 
         all_response = requests.Response()
         all_response.status_code = 200
