@@ -90,7 +90,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
             """Mock a patch response"""
             success_message = map_input_to_success_message(url)
             return MockResponse(
-                status_code=202, content=success_message, url=url
+                status_code=204, content=success_message, url=url
             )
 
         def request_delete_response(url: str) -> MockResponse:
@@ -507,16 +507,6 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         actual_response = response.json()
 
-        bad_response = requests.Response()
-        bad_response.status_code = 500
-        bad_response._content = json.dumps(
-            {"message": "Internal Server Error"}
-        ).encode("utf-8")
-        mock_api_get.side_effect = [bad_response]
-        expected_bad_response = {"message": "Internal Server Error"}
-        response_bad = self.co_client.search_all_data_assets(archived=False)
-        actual_bad_response = response_bad.json()
-
         mock_api_get.assert_has_calls(
             [
                 call(
@@ -529,17 +519,111 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
                     params={"start": 2, "limit": 1000},
                     auth=("CODEOCEAN_API_TOKEN", ""),
                 ),
-                call(
-                    "https://acmecorp.codeocean.com/api/v1/data_assets",
-                    params={"archived": False, "start": 0, "limit": 1000},
-                    auth=("CODEOCEAN_API_TOKEN", ""),
-                ),
             ]
         )
         self.assertEqual(200, response.status_code)
         self.assertEqual(expected_response, actual_response)
-        self.assertEqual(500, response_bad.status_code)
-        self.assertEqual(expected_bad_response, actual_bad_response)
+
+    @mock.patch("requests.Session.get")
+    @mock.patch("aind_codeocean_api.codeocean.sleep", return_value=None)
+    def test_search_all_data_assets_bad_response_max_retry_once(
+        self,
+        mock_sleep: unittest.mock.MagicMock,
+        mock_api_get: unittest.mock.MagicMock,
+    ) -> None:
+        """Tests search_all_data_assets method when a bad response is
+        returned once and then a good response is returned."""
+
+        mocked_response1 = requests.Response()
+        mocked_response1.status_code = 200
+        mocked_response1._content = json.dumps(
+            {
+                "has_more": True,
+                "results": [
+                    {"id": "abc123", "type": "dataset"},
+                    {"id": "def456", "type": "result"},
+                ],
+            }
+        ).encode("utf-8")
+
+        mocked_response2 = requests.Response()
+        mocked_response2.status_code = 200
+        mocked_response2._content = json.dumps(
+            {
+                "has_more": False,
+                "results": [
+                    {"id": "ghi789", "type": "result"},
+                    {"id": "jkl101", "type": "result"},
+                ],
+            }
+        ).encode("utf-8")
+
+        bad_response = requests.Response()
+        bad_response.status_code = 500
+        bad_response._content = json.dumps(
+            {"message": "Internal Server Error"}
+        ).encode("utf-8")
+
+        mock_api_get.side_effect = [
+            mocked_response1,
+            bad_response,
+            mocked_response2,
+        ]
+        expected_response = {
+            "results": [
+                {"id": "abc123", "type": "dataset"},
+                {"id": "def456", "type": "result"},
+                {"id": "ghi789", "type": "result"},
+                {"id": "jkl101", "type": "result"},
+            ]
+        }
+        response = self.co_client.search_all_data_assets()
+        actual_response = response.json()
+        self.assertEqual(expected_response, actual_response)
+        mock_sleep.assert_has_calls([call(1)])
+
+    @mock.patch("requests.Session.get")
+    @mock.patch("aind_codeocean_api.codeocean.sleep", return_value=None)
+    def test_search_all_data_assets_bad_response_max_retries(
+        self,
+        mock_sleep: unittest.mock.MagicMock,
+        mock_api_get: unittest.mock.MagicMock,
+    ) -> None:
+        """Tests search_all_data_assets method when a bad response is
+        returned."""
+
+        mocked_response1 = requests.Response()
+        mocked_response1.status_code = 200
+        mocked_response1._content = json.dumps(
+            {
+                "has_more": True,
+                "results": [
+                    {"id": "abc123", "type": "dataset"},
+                    {"id": "def456", "type": "result"},
+                ],
+            }
+        ).encode("utf-8")
+
+        bad_response = requests.Response()
+        bad_response.status_code = 500
+        bad_response._content = json.dumps(
+            {"message": "Internal Server Error"}
+        ).encode("utf-8")
+
+        mock_api_get.side_effect = [
+            mocked_response1,
+            bad_response,
+            bad_response,
+            bad_response,
+            bad_response,
+        ]
+        with self.assertRaises(ConnectionError) as e:
+            self.co_client.search_all_data_assets()
+        self.assertEqual(
+            "There was an error getting data from Code Ocean: 500",
+            e.exception.args[0],
+        )
+        mock_sleep.assert_has_calls([call(1), call(4), call(9)])
 
     @mock.patch("requests.put")
     def test_update_data_asset(
@@ -949,12 +1033,12 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
-                return MockResponse(status_code=204, content=None, url="")
+                return MockResponse(status_code=204, content={}, url="")
 
             return request_post_response
 
-        users = ([{"email": "user2@email.com", "role": "viewer"}],)
-        groups = ([{"group": "group4", "role": "viewer"}],)
+        users = [{"email": "user2@email.com", "role": "viewer"}]
+        groups = [{"group": "group4", "role": "viewer"}]
         everyone = "viewer"
 
         example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
@@ -987,12 +1071,12 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
             def request_post_response(json: dict) -> MockResponse:
                 """Mock a post response"""
-                return MockResponse(status_code=204, content=None, url="")
+                return MockResponse(status_code=204, content={}, url="")
 
             return request_post_response
 
-        users = ([{"email": "user2@email.com", "role": "viewer"}],)
-        groups = ([{"group": "group4", "role": "viewer"}],)
+        users: List[dict] = [{"email": "user2@email.com", "role": "viewer"}]
+        groups: List[dict] = [{"group": "group4", "role": "viewer"}]
 
         example_data_asset_id = "648473aa-791e-4372-bd25-205cc587ec56"
         input_json_data = {
@@ -1017,7 +1101,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def map_to_success_message(_) -> dict:
             """Map to a success message"""
-            return ""
+            return {}
 
         mocked_success_patch = self.mock_success_response(
             map_to_success_message, req_type="patch"
@@ -1036,7 +1120,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
         )
 
         self.assertEqual(response.url, expected_url)
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 204)
 
     @mock.patch("requests.delete")
     def test_delete_data_asset(
@@ -1046,7 +1130,7 @@ class TestCodeOceanDataAssetRequests(unittest.TestCase):
 
         def map_to_success_message(_) -> dict:
             """Map to a success message"""
-            return ""
+            return {}
 
         mocked_success_delete = self.mock_success_response(
             map_to_success_message, req_type="delete"
