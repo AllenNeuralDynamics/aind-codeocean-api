@@ -5,6 +5,14 @@
 
 Python wrapper around CodeOcean's REST API.
 
+# DEPRECATION WARNING
+
+Code Ocean has published their own SDK:
+
+https://github.com/codeocean/codeocean-sdk-python
+
+We will be dropping support of this package in favor of the official SDK.
+
 ## Installation
 To install from [PyPI](https://pypi.org/project/aind-codeocean-api/), run:
 ```
